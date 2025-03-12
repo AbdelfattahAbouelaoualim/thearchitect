@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How to transfer a Python graph to a Neo4j graph | The Architect</title>
+  <meta name="description" content="A complete post.">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="/css/styles.css">
+  
+  <!-- Prism CSS for code syntax highlighting -->
+  <link rel="stylesheet" href="/css/prism.css">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+</head>
+<body>
+  
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+    <div class="container">
+      <a class="navbar-brand" href="/">The Architect</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item ">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+          <li class="nav-item ">
+            <a class="nav-link" href="/about/">About</a>
+          </li>
+          <li class="nav-item ">
+            <a class="nav-link" href="/author/">Author</a>
+          </li>
+          <li class="nav-item ">
+            <a class="nav-link" href="/contact/">Contact</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main>
+    
+<div class="container">
+  <div class="row">
+    <div class="col-lg-8">
+      <article class="post">
+        <header class="article-header">
+          <h1 class="article-title">How to transfer a Python graph to a Neo4j graph</h1>
+          <div class="article-meta">
+            <span><i class="far fa-calendar-alt mr-1"></i> 26 Apr 2021</span>
+            
+            <span class="ml-3">
+              <i class="far fa-folder-open mr-1"></i><a href="/categories/#data-science">Data Science</a></span>
+            
+          </div>
+        </header>
+
+        
+        <div class="article-image mb-4">
+          <img src="/img/pton.png" alt="How to transfer a Python graph to a Neo4j graph" class="img-fluid w-100">
+        </div>
+        
+
+        <div class="article-content">
+          <style>
+  @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap');
+  
+  body {
+      font-family: 'Open Sans', sans-serif;
+  }
+
+  h1 {
+    font-family: 'Roboto', sans-serif;
+    color: #007bff;
+    margin-top: 30px;
+  }
+
+  h3 {
+    font-family: 'Roboto', sans-serif;
+    color: #007bff;
+    margin-top: 30px;
+  }
+
+  h4 {
+    font-family: 'Roboto', sans-serif;
+    color: #EA950B;
+    margin-top: 30px;
+  }
+
+  pre {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+  }
+</style>
+<ul>
+<li>Data concerning publications found on the data.world website</li>
+<li>Data concerning the Olympic winter sport competitions found in the data.world website</li>
+<li>Music data found in kaggle website</li>
+</ul>
+<p>The objective here is to generate the csv files which will represent the corpus (that will be treated in Corpus_pre_processing.ipynb) and the graphs that I will imported into <strong>neo4j</strong>.</p>
+<pre class="code-block language-python"><code class=" language-python">import pandas as pd
+from pandarallel import pandarallel
+pandarallel.initialize()
+</code></pre><p>New pandarallel memory created - Size: 2000 MB<br>
+Pandarallel will run on 8 workers</p>
+<p>Data about publications:<br>
+These data come from <em><strong>roswell park cancer institute</strong></em> that I found in the data.world website <a href="https://data.world/data-ny-gov/cafv-pqiz/workspace/file?filename=publications-from-roswell-park-cancer-institute-beginning-2006-1.csv">here</a></p>
+<pre class="code-block language-python"><code class=" language-python">articles = pd.read_csv("data/publications-from-roswell-park-cancer-institute-beginning-2006-1.csv")
+</code></pre><pre class="code-block language-python"><code class=" language-python">articles.head()
+</code></pre><pre class="code-block language-python"><code class=" language-python">articles.info()
+</code></pre><p>&lt;class ‘pandas.core.frame.DataFrame’&gt;<br>
+RangeIndex: 10147 entries, 0 to 10146<br>
+Data columns (total 11 columns):<br>
+Year Published          10147 non-null int64<br>
+Publication Type        10147 non-null object<br>
+Journal Name            10116 non-null object<br>
+Publication Title       10147 non-null object<br>
+Author List             10145 non-null object<br>
+Journal Volume          9867 non-null float64<br>
+Journal Issue Number    9227 non-null object<br>
+Journal Page Range      10103 non-null object<br>
+ISSN                    9850 non-null object<br>
+Peer Reviewed           10147 non-null object<br>
+Impact Factor           7753 non-null object<br>
+dtypes: float64(1), int64(1), object(9)<br>
+memory usage: 872.1+ KB</p>
+<p>Check if there are any problems in the data!</p>
+<pre class="code-block language-python"><code class=" language-python">articles["Peer Reviewed"].value_counts()
+</code></pre><p>TRUE     7118<br>
+1        2705<br>
+FALSE     278<br>
+0          46<br>
+Name: Peer Reviewed, dtype: int64</p>
+<pre class="code-block language-python"><code class=" language-python">articles.columns
+</code></pre><p>Index([‘Year Published’, ‘Publication Type’, ‘Journal Name’,<br>
+‘Publication Title’, ‘Author List’, ‘Journal Volume’,<br>
+‘Journal Issue Number’, ‘Journal Page Range’, ‘ISSN’, ‘Peer Reviewed’,<br>
+‘Impact Factor’],<br>
+dtype=‘object’)</p>
+<p>I will choose the columns that will be used to create the <strong>ontology</strong>.</p>
+<pre class="code-block language-python"><code class=" language-python">articles = articles[['Journal Name', 'Publication Title', 'Author List', 'Peer Reviewed']]
+</code></pre><pre class="code-block language-python"><code class=" language-python">articles.dropna(inplace=True)
+</code></pre><pre class="code-block language-python"><code class=" language-python">articles.reset_index(drop=True, inplace = True)
+</code></pre><pre class="code-block language-python"><code class=" language-python">articles.head()
+</code></pre><p>Put <em><strong>peer reviewed</strong></em> or <em><strong>not peer reviewed</strong></em> in the column <strong>Peer Reviewed</strong></p>
+<pre class="code-block language-python"><code class=" language-python">def peer(x):
+    if x == '1' or x == 'TRUE' or x == 1:
+        return "peer reviewed"
+    elif x == '0' or x == 'FALSE' or x == 0:
+        return "not peer reviewed"
+</code></pre><pre class="code-block language-python"><code class=" language-python">articles['Peer Reviewed'] = articles['Peer Reviewed'].parallel_apply(peer)
+</code></pre><pre class="code-block language-python"><code class=" language-python">articles.head()
+</code></pre><p>Add a column <strong>Topic</strong><br>
+The <strong>topic</strong> will be an attribute of the authors and also of the articles in the ontology.</p>
+<pre class="code-block language-python"><code class=" language-python">def preprocessing(text, result = 'str'):
+    from string import punctuation
+    from nltk.tokenize import word_tokenize
+    from nltk.corpus import stopwords
+    import slugify
+    remove_terms = punctuation + '0123456789'
+    words = word_tokenize(text)
+    tokens = [w for w in words if w.lower() not in remove_terms]
+    stopw = stopwords.words('english')
+    tokens = [token for token in tokens if token not in stopw]
+    # remove words less than one letters
+    tokens = [word for word in tokens if len(word)>2]
+    # remove remaining tokens that are not alphabetic
+    tokens = [word for word in tokens if word.isalpha()]
+    tokens = [slugify.slugify(word) for word in tokens]
+    if result == 'str':
+        tokens = ' '.join(tokens)
+    return tokens
+</code></pre><pre class="code-block language-python"><code class=" language-python">articles['title_topic'] = articles['Publication Title'].parallel_apply(preprocessing)
+articles.head()
+</code></pre><pre class="code-block language-python"><code class=" language-python">all_unique_words_in_titles = set()
+for i in articles.index:
+    all_unique_words_in_titles.add(articles.iloc[i]["title_topic"])
+   
+all_unique_words_in_titles = preprocessing(' '.join(list(all_unique_words_in_titles)), list)
+print("Number of unique words in titles:", len(all_unique_words_in_titles))
+</code></pre><p>Number of unique words in titles: 94650</p>
+<p>To extract topics from a text, normally we use the techniques of <em><strong>Named Entity Recognition</strong></em> or <em><strong>Latent Dirichlet Allocation</strong></em> using libraries such as <strong>NLTK</strong> or <strong>spaCy</strong> or transfer learning based on pre-trained models like <strong>Bert</strong>… But due to lack of time, I will use the <strong>FastText</strong> library and using the similarity, I will create my <strong>Topic</strong> column</p>
+<pre class="code-block language-python"><code class=" language-python">from gensim.models.fasttext import FastText
+from nltk import WordPunctTokenizer
+wpt = WordPunctTokenizer()
+tokenized_corpus = [wpt.tokenize(doc) for doc in all_unique_words_in_titles]
+</code></pre><pre class="code-block language-python"><code class=" language-python">feature_size = 500   # Word embedding vector dimensionality  
+window_context = 5  # Context window size                                                                                    
+min_word_count = 2 #2   # Minimum word count                        
+sample = 1e-3   # Downsample setting for frequent words
+</code></pre><pre class="code-block language-python"><code class=" language-python">fasttext_model_sg = FastText(tokenized_corpus,
+                          size=feature_size,
+                          window=window_context,
+                          min_count=min_word_count,
+                          sample=sample,
+                          sg=1, # sg decides whether to use the skip-gram model (1) or CBOW (0)
+                          iter=100)
+</code></pre><pre class="code-block language-python"><code class=" language-python">def title_topic(title):
+    if len(title.split(" ")) > 1:
+        return fasttext_model_sg.wv.most_similar(title)[0][0]
+    if len(title.split(" ")) == 1:
+        return title
+</code></pre><pre class="code-block language-python"><code class=" language-python">from collections import defaultdict
+</code></pre><pre class="code-block language-python"><code class=" language-python">title_dict = defaultdict(list)
+for i in articles.index:
+    try:
+        title_dict["title_topic"].append(title_topic(articles.iloc[i]["title_topic"]))
+    except:
+        title_dict["title_topic"].append("")
+</code></pre><pre class="code-block language-python"><code class=" language-python">articles["Topic"] = pd.Series(title_dict)["title_topic"]
+</code></pre><pre class="code-block language-python"><code class=" language-python">articles = articles[articles["title_topic"] != '']
+articles = articles[articles["Topic"] != '']
+articles = articles.reset_index(drop=True)
+</code></pre><pre class="code-block language-python"><code class=" language-python">articles.drop(columns=['title_topic'], inplace=True)
+articles.head()
+</code></pre><pre class="code-block language-python"><code class=" language-python">articles.drop_duplicates(inplace=True)
+</code></pre><p>Normally I have to create my ‘knwoldege Graph’ from the corpus that I will generate at the end of this jupyter notebook, but for reasons that I will explain in a second jupyter notebook <strong>Corpus_pre_processing.ipynb</strong>, I will generate csv files that will be used to create the publications part of my graph on neo4j.</p>
+<p><strong>Warning:</strong> <font color='red'>On my laptop the Cypher queries crash if I take all the data. To give you a live demonstration without any problem, I will only take the first 100 rows of the DataFrame <strong>articles</strong>.</font></p>
+<p>Nodes that represent the authors and their attributes<br>
+The attribues of an author are:</p>
+<ul>
+<li>name</li>
+<li>topic</li>
+<li>article title</li>
+</ul>
+<pre class="code-block language-python"><code class=" language-python">author = articles[['Author List', 'Topic', 'Publication Title']].head(100)
+</code></pre><pre class="code-block language-python"><code class=" language-python">author.rename(columns={'Author List': "name", 'Topic': "topic", 'Publication Title': 'article title'}, inplace=True)
+</code></pre><pre class="code-block language-python"><code class=" language-python">def string_to_list(x):
+    return x.split(';')
+</code></pre><pre class="code-block language-python"><code class=" language-python">author['name'] = author['name'].parallel_apply(string_to_list)
+</code></pre><pre class="code-block language-python"><code class=" language-python">author.head()
+</code></pre><pre class="code-block language-python"><code class=" language-python">author.info()
+</code></pre><p>&lt;class ‘pandas.core.frame.DataFrame’&gt;<br>
+RangeIndex: 100 entries, 0 to 99<br>
+Data columns (total 3 columns):<br>
+name             100 non-null object<br>
+topic            100 non-null object<br>
+article title    100 non-null object<br>
+dtypes: object(3)<br>
+memory usage: 2.5+ KB</p>
+<pre class="code-block language-python"><code class=" language-python">import numpy as np 
+</code></pre><p>Convert author to long form</p>
+<pre class="code-block language-python"><code class=" language-python">author = pd.DataFrame({
+      col:np.repeat(author[col].values, author['name'].str.len())
+      for col in author.columns.drop('name')}
+    ).assign(**{'name':np.concatenate(author['name'].values)})[author.columns]
+</code></pre><pre class="code-block language-python"><code class=" language-python">author.head()
+</code></pre><pre class="code-block language-python"><code class=" language-python">author.info()
+</code></pre><p>&lt;class ‘pandas.core.frame.DataFrame’&gt;<br>
+RangeIndex: 1240 entries, 0 to 1239<br>
+Data columns (total 3 columns):<br>
+name             1240 non-null object<br>
+topic            1240 non-null object<br>
+article title    1240 non-null object<br>
+dtypes: object(3)<br>
+memory usage: 29.2+ KB</p>
+<pre class="code-block language-python"><code class=" language-python">author = author[['name', 'topic']]
+</code></pre><pre class="code-block language-python"><code class=" language-python">author.drop_duplicates(inplace=True)
+</code></pre><p>/home/arij/anaconda3/lib/python3.6/site-packages/ipykernel_launcher.py:1: SettingWithCopyWarning:<br>
+A value is trying to be set on a copy of a slice from a DataFrame</p>
+<p>See the caveats in the documentation: <a href="http://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy">http://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy</a><br>
+“”&quot;Entry point for launching an IPython kernel.</p>
+<pre class="code-block language-python"><code class=" language-python">author.info()
+</code></pre><p>&lt;class ‘pandas.core.frame.DataFrame’&gt;<br>
+Int64Index: 1234 entries, 0 to 1239<br>
+Data columns (total 2 columns):<br>
+name     1234 non-null object<br>
+topic    1234 non-null object<br>
+dtypes: object(2)<br>
+memory usage: 28.9+ KB</p>
+<p>Nodes that represent the articles and their attributes<br>
+The attribues of an article are:</p>
+<ul>
+<li>article title</li>
+<li>topic</li>
+<li>published in</li>
+<li>authors</li>
+</ul>
+<pre class="code-block language-python"><code class=" language-python">article = articles[['Publication Title', 'Topic', 'Journal Name', 'Author List']].head(100)
+</code></pre><pre class="code-block language-python"><code class=" language-python">article.rename(columns={'Publication Title': 'article title', 'Topic': "topic", 'Journal Name': 'published in', 'Author List': 'authors'}, inplace=True)
+</code></pre><pre class="code-block language-python"><code class=" language-python">article.head()
+</code></pre><pre class="code-block language-python"><code class=" language-python">article.info()
+</code></pre><p>&lt;class ‘pandas.core.frame.DataFrame’&gt;<br>
+Int64Index: 100 entries, 0 to 99<br>
+Data columns (total 4 columns):<br>
+article title    100 non-null object<br>
+topic            100 non-null object<br>
+published in     100 non-null object<br>
+authors          100 non-null object<br>
+dtypes: object(4)<br>
+memory usage: 3.9+ KB</p>
+<pre class="code-block language-python"><code class=" language-python">article.drop_duplicates(inplace=True)
+</code></pre><p>Nodes that represent the journals and their attributes<br>
+The attribues of a journal are:</p>
+<ul>
+<li>name</li>
+<li>evaluation</li>
+</ul>
+<pre class="code-block language-python"><code class=" language-python">journal = articles[['Journal Name', 'Peer Reviewed']].head(100)
+</code></pre><pre class="code-block language-python"><code class=" language-python">journal.rename(columns={'Journal Name': 'name', 'Peer Reviewed': 'evaluation'}, inplace=True)
+</code></pre><pre class="code-block language-python"><code class=" language-python">journal.head()
+</code></pre><pre class="code-block language-python"><code class=" language-python">journal.info()
+</code></pre><p>&lt;class ‘pandas.core.frame.DataFrame’&gt;<br>
+RangeIndex: 100 entries, 0 to 99<br>
+Data columns (total 2 columns):<br>
+name          100 non-null object<br>
+evaluation    100 non-null object<br>
+dtypes: object(2)<br>
+memory usage: 1.7+ KB</p>
+<pre class="code-block language-python"><code class=" language-python">journal.drop_duplicates(inplace=True)
+</code></pre><pre class="code-block language-python"><code class=" language-python">journal.info()
+</code></pre><p>&lt;class ‘pandas.core.frame.DataFrame’&gt;<br>
+Int64Index: 77 entries, 0 to 98<br>
+Data columns (total 2 columns):<br>
+name          77 non-null object<br>
+evaluation    77 non-null object<br>
+dtypes: object(2)<br>
+memory usage: 1.8+ KB</p>
+<pre class="code-block language-python"><code class=" language-python">journal.to_csv("journal.csv", encoding='utf-8', index=False)
+article.to_csv("article.csv", encoding='utf-8', index=False)
+author.to_csv("author.csv", encoding='utf-8', index=False)
+</code></pre><p>Data about music:<br>
+These data come from <em><strong>kaggle</strong></em> website <a href="https://www.kaggle.com/leonardopena/top50spotify2019">here</a></p>
+<pre class="code-block language-python"><code class=" language-python">music = pd.read_csv("data/top50.csv", engine='python')
+</code></pre><pre class="code-block language-python"><code class=" language-python">music.head()
+</code></pre><pre class="code-block language-python"><code class=" language-python">music.info()
+</code></pre><p>&lt;class ‘pandas.core.frame.DataFrame’&gt;<br>
+RangeIndex: 50 entries, 0 to 49<br>
+Data columns (total 14 columns):<br>
+Unnamed: 0          50 non-null int64<br>
+<a href="http://Track.Name">Track.Name</a>          50 non-null object<br>
+<a href="http://Artist.Name">Artist.Name</a>         50 non-null object<br>
+Genre               50 non-null object<br>
+Beats.Per.Minute    50 non-null int64<br>
+Energy              50 non-null int64<br>
+Danceability        50 non-null int64<br>
+Loudness…dB…      50 non-null int64<br>
+Liveness            50 non-null int64<br>
+Valence.            50 non-null int64<br>
+Length.             50 non-null int64<br>
+Acousticness…      50 non-null int64<br>
+Speechiness.        50 non-null int64<br>
+Popularity          50 non-null int64<br>
+dtypes: int64(11), object(3)<br>
+memory usage: 5.6+ KB</p>
+<p><strong>Warning:</strong> <font color='red'>This data only contains <strong>50</strong> rows! Once in the corpus will make it <strong>unbalanced</strong>. This means that to <strong>clustering</strong> on the corpus for <strong>sharding</strong> purposes, you have to <em><strong>increase the data</strong></em> or at least <em><strong>add weights</strong></em> in the training set (but with 50 rows, adding weights in the training set will not be enough, it is necessary to add music data).</font></p>
+<pre class="code-block language-python"><code class=" language-python">music["Danceability"].value_counts()
+</code></pre><pre class="code-block language-python"><code class=" language-python">music["Liveness"].value_counts()
+</code></pre><pre class="code-block language-python"><code class=" language-python">music["Valence."].value_counts()
+</code></pre><pre class="code-block language-python"><code class=" language-python">music.columns
+</code></pre><pre class="code-block language-python"><code class=" language-python">music = music[['Track.Name', 'Artist.Name', 'Genre', 'Liveness', 'Valence.']]
+</code></pre><pre class="code-block language-python"><code class=" language-python">music.drop_duplicates(inplace=True)
+</code></pre><pre class="code-block language-python"><code class=" language-python">music.dropna(inplace=True)
+</code></pre><pre class="code-block language-python"><code class=" language-python">music.reset_index(drop=True, inplace = True)
+</code></pre><pre class="code-block language-python"><code class=" language-python">music.head()
+</code></pre><p>I do some suitable transformations.</p>
+<pre class="code-block language-python"><code class=" language-python">def mood(x):
+    if x <= 1:
+        return "negative"
+    else:
+        return "positive"
+</code></pre><pre class="code-block language-python"><code class=" language-python">def live(x):
+    if x <= 1:
+        return "no"
+    else:
+        return "yes"
+</code></pre><pre class="code-block language-python"><code class=" language-python">music['Valence.'] = music['Valence.'].parallel_apply(mood)
+music['Liveness'] = music['Liveness'].parallel_apply(live)
+</code></pre><pre class="code-block language-python"><code class=" language-python">music.head()
+</code></pre><p>Nodes that represent the artist and their attributes<br>
+The attribues of an artist are:</p>
+<ul>
+<li>name</li>
+<li>track</li>
+<li>genre</li>
+</ul>
+<pre class="code-block language-python"><code class=" language-python">artist = music[['Artist.Name', 'Track.Name', 'Genre']]
+</code></pre><pre class="code-block language-python"><code class=" language-python">artist.rename(columns={'Artist.Name': 'name', 'Track.Name': 'track', 'Genre': 'genre'}, inplace=True)
+</code></pre><pre class="code-block language-python"><code class=" language-python">artist.head()
+</code></pre><p>Nodes that represent the song and their attributes<br>
+The attribues of a song are:</p>
+<ul>
+<li>track</li>
+<li>genre</li>
+<li>mood</li>
+</ul>
+<pre class="code-block language-python"><code class=" language-python">song = music[['Track.Name', 'Genre', 'Valence.']]
+</code></pre><pre class="code-block language-python"><code class=" language-python">song.rename(columns={'Track.Name': 'track', 'Genre': 'genre', 'Valence.': 'mood'}, inplace=True)
+</code></pre><pre class="code-block language-python"><code class=" language-python">song.head()
+</code></pre><pre class="code-block language-python"><code class=" language-python">artist.to_csv("artist.csv", encoding='utf-8', index=False)
+song.to_csv("song.csv", encoding='utf-8', index=False)
+</code></pre><p>Data about athletes:<br>
+These data come from <em><strong>athletes in winter olympics</strong></em> that I found in the data.world website <a href="https://data.world/kabilan/athletes-in-winter-olympics/workspace/file?filename=Winer+Olympic+Medals.xlsx">here</a></p>
+<pre class="code-block language-python"><code class=" language-python">olympics = pd.read_excel("data/Winer Olympic Medals.xlsx")
+</code></pre><pre class="code-block language-python"><code class=" language-python">olympics.head()
+</code></pre><pre class="code-block language-python"><code class=" language-python">olympics.info()
+</code></pre><pre class="code-block language-python"><code class=" language-python">olympics.columns
+</code></pre><p>Index([‘Year’, ‘Sport’, ‘Event’, ‘Country’, ‘Gender’, ‘Medal Rank’, ‘Medal’,<br>
+‘Name of Athlete or Team’, ‘Age of Athlete’],<br>
+dtype=‘object’)</p>
+<pre class="code-block language-python"><code class=" language-python">olympics = olympics[['Year', 'Sport', 'Country', 'Gender', 'Medal', 'Name of Athlete or Team', 'Age of Athlete']]
+</code></pre><pre class="code-block language-python"><code class=" language-python">olympics.drop_duplicates(inplace=True)
+</code></pre><pre class="code-block language-python"><code class=" language-python">olympics.dropna(inplace=True)
+</code></pre><pre class="code-block language-python"><code class=" language-python">olympics.info()
+</code></pre><pre class="code-block language-python"><code class=" language-python">olympics.reset_index(drop=True, inplace = True)
+</code></pre><pre class="code-block language-python"><code class=" language-python">olympics.head()
+</code></pre><p><strong>Warning:</strong> <font color='red'>On my laptop the Cypher queries crash if I take all the data. To give you a live demonstration without any problem, I will only take the first 50 rows of the DataFrame <strong>olympics</strong>.</font></p>
+<p>Nodes that represent the athlete and their attributes<br>
+The attribues of an athlete are:</p>
+<ul>
+<li>name</li>
+<li>gender</li>
+<li>age</li>
+<li>sport</li>
+<li>country</li>
+<li>medal</li>
+<li>year</li>
+</ul>
+<pre class="code-block language-python"><code class=" language-python">athlete = olympics[['Name of Athlete or Team', 'Gender', 'Age of Athlete', 'Sport', 'Country', 'Medal', 'Year']].head(50)
+</code></pre><pre class="code-block language-python"><code class=" language-python">athlete.rename(columns={'Name of Athlete or Team': 'name', 'Gender': 'gender', 'Age of Athlete': 'age', 'Sport': 'sport','Country': 'country', 'Medal': 'medal', 'Year': 'year'}, inplace=True)
+</code></pre><pre class="code-block language-python"><code class=" language-python">athlete.drop_duplicates(inplace=True)
+</code></pre><pre class="code-block language-python"><code class=" language-python">athlete.reset_index(drop=True, inplace = True)
+</code></pre><pre class="code-block language-python"><code class=" language-python">athlete.head()
+</code></pre><pre class="code-block language-python"><code class=" language-python">athlete.info()
+</code></pre><p>Nodes that represent the sport and their attributes<br>
+The attribues of a sport are:</p>
+<ul>
+<li>sport</li>
+</ul>
+<pre class="code-block language-python"><code class=" language-python">sport = olympics[['Sport']].head(50)
+</code></pre><pre class="code-block language-python"><code class=" language-python">sport.rename(columns={'Sport': 'sport'}, inplace=True)
+</code></pre><pre class="code-block language-python"><code class=" language-python">sport.drop_duplicates(inplace=True)
+</code></pre><pre class="code-block language-python"><code class=" language-python">sport.dropna(inplace=True)
+</code></pre><pre class="code-block language-python"><code class=" language-python">sport.reset_index(drop=True, inplace = True)
+</code></pre><pre class="code-block language-python"><code class=" language-python">sport.info()
+</code></pre><pre class="code-block language-python"><code class=" language-python">sport.head()
+</code></pre><p>Nodes that represent the medal and their attributes<br>
+The attribues of a medal are:</p>
+<ul>
+<li>medal</li>
+</ul>
+<pre class="code-block language-python"><code class=" language-python">medal = olympics[['Medal']].head(50)
+</code></pre><pre class="code-block language-python"><code class=" language-python">medal.rename(columns={'Medal': 'medal'}, inplace=True)
+</code></pre><pre class="code-block language-python"><code class=" language-python">medal.drop_duplicates(inplace=True)
+</code></pre><pre class="code-block language-python"><code class=" language-python">medal.dropna(inplace=True)
+</code></pre><pre class="code-block language-python"><code class=" language-python">medal.reset_index(drop=True, inplace = True)
+</code></pre><pre class="code-block language-python"><code class=" language-python">medal.info()
+</code></pre><p>&lt;class ‘pandas.core.frame.DataFrame’&gt;<br>
+RangeIndex: 3 entries, 0 to 2<br>
+Data columns (total 1 columns):<br>
+medal    3 non-null object<br>
+dtypes: object(1)<br>
+memory usage: 152.0+ bytes</p>
+<pre class="code-block language-python"><code class=" language-python">medal.head()
+</code></pre><pre class="code-block language-python"><code class=" language-python">athlete.to_csv("athlete.csv", encoding='utf-8', index=False)
+sport.to_csv("sport.csv", encoding='utf-8', index=False)
+medal.to_csv("medal.csv", encoding='utf-8', index=False)
+</code></pre>
+        </div>
+
+        
+
+        <nav class="article-navigation">
+          
+            
+            
+
+            <div class="article-navigation-prev">
+              
+                <span class="article-navigation-label">Previous Article</span>
+                <a href="/_posts/2021-05-01-MP/">How to use MongoDb with Python</a>
+              
+            </div>
+
+            <div class="article-navigation-next text-right">
+              
+                <span class="article-navigation-label">Next Article</span>
+                <a href="/_posts/2021-04-18-NodeClassification/">How to do node classification and choose important features</a>
+              
+            </div>
+          
+        </nav>
+      </article>
+    </div>
+
+    <div class="col-lg-4">
+      <aside class="sidebar">
+        <div class="sidebar-sticky">
+          <div class="sidebar-box">
+            <h3 class="sidebar-title">About</h3>
+            <p>Modern cloud, data, and AI architecture</p>
+            <a href="/about/" class="btn btn-outline-primary btn-sm">Learn more</a>
+          </div>
+          
+          <div class="sidebar-box">
+            <h3 class="sidebar-title">Stay Connected</h3>
+            <div class="social-media">
+              <a href="https://github.com/AbdelfattahAbouelaoualim" target="_blank" title="GitHub">
+                <i class="fab fa-github"></i>
+              </a>
+              <a href="https://www.linkedin.com/in/ia-ds-bg/" target="_blank" title="LinkedIn">
+                <i class="fab fa-linkedin-in"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div> 
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-4 mb-4">
+          <h5>About</h5>
+          <p>Modern cloud, data, and AI architecture</p>
+          <div class="social-media mt-3">
+            <a href="https://github.com/AbdelfattahAbouelaoualim" target="_blank" title="GitHub">
+              <i class="fab fa-github"></i>
+            </a>
+            <a href="https://www.linkedin.com/in/ia-ds-bg/" target="_blank" title="LinkedIn">
+              <i class="fab fa-linkedin-in"></i>
+            </a>
+          </div>
+        </div>
+        <div class="col-lg-4 mb-4">
+          <h5>Quick Links</h5>
+          <ul>
+            <li>
+              <a href="/">Home</a>
+            </li>
+            <li>
+              <a href="/about/">About</a>
+            </li>
+            <li>
+              <a href="/author/">Author</a>
+            </li>
+            <li>
+              <a href="/contact/">Contact</a>
+            </li>
+          </ul>
+        </div>
+        <div class="col-lg-4">
+          <h5>Categories</h5>
+          <ul>
+            
+            <li>
+              <a href="/categories/#computer-science">Computer Science</a>
+            </li>
+            
+            
+            <li>
+              <a href="/categories/#data-engineering">Data Engineering</a>
+            </li>
+            
+            
+            <li>
+              <a href="/categories/#mathematics">Mathematics</a>
+            </li>
+            
+            
+            <li>
+              <a href="/categories/#graph-theory">Graph Theory</a>
+            </li>
+            
+            
+            <li>
+              <a href="/categories/#machine-learning">Machine Learning</a>
+            </li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 The Architect | Made with <i class="fas fa-heart text-danger"></i></p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Back to Top Button -->
+  <div id="back-to-top" class="d-none">
+    <a href="#" class="btn btn-primary btn-sm rounded-circle">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Back to top button
+    $(window).scroll(function() {
+      if ($(this).scrollTop() > 300) {
+        $('#back-to-top').removeClass('d-none').addClass('d-block');
+      } else {
+        $('#back-to-top').removeClass('d-block').addClass('d-none');
+      }
+    });
+    
+    $('#back-to-top a').click(function(e) {
+      e.preventDefault();
+      $('html, body').animate({scrollTop: 0}, 300);
+      return false;
+    });
+  </script>
+</body>
+</html> 

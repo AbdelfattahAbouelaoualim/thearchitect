@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Empowering Data Workflows with dbt: A SQL Lover&#39;s Delight | The Architect</title>
+  <meta name="description" content="Modern cloud, data, and AI architecture">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="/css/styles.css">
+  
+  <!-- Prism CSS for code syntax highlighting -->
+  <link rel="stylesheet" href="/css/prism.css">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+</head>
+<body>
+  
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+    <div class="container">
+      <a class="navbar-brand" href="/">The Architect</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item ">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+          <li class="nav-item ">
+            <a class="nav-link" href="/about/">About</a>
+          </li>
+          <li class="nav-item ">
+            <a class="nav-link" href="/author/">Author</a>
+          </li>
+          <li class="nav-item ">
+            <a class="nav-link" href="/contact/">Contact</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main>
+    
+<div class="container">
+  <div class="row">
+    <div class="col-lg-8">
+      <article class="post">
+        <header class="article-header">
+          <h1 class="article-title">Empowering Data Workflows with dbt: A SQL Lover&#39;s Delight</h1>
+          <div class="article-meta">
+            <span><i class="far fa-calendar-alt mr-1"></i> 03 Dec 2022</span>
+            
+            <span class="ml-3">
+              <i class="far fa-folder-open mr-1"></i><a href="/categories/#computer-science">Computer Science</a>, <a href="/categories/#data-engineering">Data Engineering</a>, <a href="/categories/#analytics-engineering">Analytics Engineering</a></span>
+            
+          </div>
+        </header>
+
+        
+        <div class="article-image mb-4">
+          <img src="/img/dbt.png" alt="Empowering Data Workflows with dbt: A SQL Lover&#39;s Delight" class="img-fluid w-100">
+        </div>
+        
+
+        <div class="article-content">
+          <style>
+  @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap');
+  
+  body {
+      font-family: 'Open Sans', sans-serif;
+  }
+
+  h1 {
+    font-family: 'Roboto', sans-serif;
+    color: #007bff;
+    margin-top: 30px;
+  }
+
+  h3 {
+    font-family: 'Roboto', sans-serif;
+    color: #007bff;
+    margin-top: 30px;
+  }
+
+  h4 {
+    font-family: 'Roboto', sans-serif;
+    color: #EA950B;
+    margin-top: 30px;
+  }
+
+  pre {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+  }
+</style>
+<h3 id="introduction" tabindex="-1">Introduction <a class="direct-link" href="#introduction" aria-hidden="true"></a></h3>
+<p>dbt (data build tool) is a revolutionary tool in the realm of analytics engineering and data transformation. It empowers data analysts and engineers to transform and model data in the warehouse through SQL. Unlike traditional ETL (Extract, Transform, Load) processes, dbt advocates for an ELT (Extract, Load, Transform) approach, enabling transformations to occur within the data warehouse. This approach allows for version-controlled, tested, and documented data transformation workflows, which are critical for reliable data analytics.</p>
+<h3 id="setting-sail-with-dbt" tabindex="-1">Setting Sail with dbt <a class="direct-link" href="#setting-sail-with-dbt" aria-hidden="true"></a></h3>
+<h4 id="1-installation" tabindex="-1">1. Installation <a class="direct-link" href="#1-installation" aria-hidden="true"></a></h4>
+<p>Installing dbt is a straightforward process that can be done through pip:</p>
+<pre class="code-block language-bash"><code class=" language-bash"># Install dbt
+$ pip install dbt
+</code></pre><h4 id="2-project-configuration" tabindex="-1">2. Project Configuration <a class="direct-link" href="#2-project-configuration" aria-hidden="true"></a></h4>
+<p>Once installed, you will need to create a dbt project and configure your data warehouse connection:</p>
+<pre class="code-block language-yaml"><code class=" language-yaml"># dbt_project.yml
+name: 'my_dbt_project'
+version: '1.0.0'
+profile: 'default'
+</code></pre><pre class="code-block language-yaml"><code class=" language-yaml"># profiles.yml
+default:
+  outputs:
+    dev:
+      type: 'bigquery'
+      method: 'oauth'
+      project: 'my_project'
+      dataset: 'my_dataset'
+      threads: 1
+      timeout_seconds: 300
+</code></pre><h3 id="building-models" tabindex="-1">Building Models <a class="direct-link" href="#building-models" aria-hidden="true"></a></h3>
+<p>In dbt, data transformation models are built using SQL and are organized in a project directory structure:</p>
+<pre class="code-block language-bash"><code class=" language-bash"># Directory structure
+models/
+  my_model.sql
+  ...
+</code></pre><pre class="code-block language-sql"><code class=" language-sql">-- my_model.sql
+SELECT
+  column1,
+  column2,
+  COUNT(*) as count
+FROM
+  
+  {{ ref('source_table') }}
+  
+GROUP BY
+  column1,
+  column2;
+</code></pre><h3 id="running-and-testing-models" tabindex="-1">Running and Testing Models <a class="direct-link" href="#running-and-testing-models" aria-hidden="true"></a></h3>
+<p>dbt provides a variety of commands to run, test, and document your models:</p>
+<pre class="code-block language-bash"><code class=" language-bash"># Run models
+$ dbt run
+
+# Test models
+$ dbt test
+</code></pre><h3 id="materializing-models" tabindex="-1">Materializing Models <a class="direct-link" href="#materializing-models" aria-hidden="true"></a></h3>
+<p>dbt supports different materializations (views, tables, incremental models, etc.) to optimize the performance of your analytics workflow:</p>
+<pre class="code-block language-sql"><code class=" language-sql">-- config block
+
+{{ config(materialized='incremental') }}
+
+
+-- model SQL
+SELECT
+  column1,
+  column2,
+  COUNT(*) as count
+FROM
+  
+  {{ ref('source_table') }}
+  
+GROUP BY
+  column1,
+  column2;
+</code></pre><h3 id="version-control-and-documentation" tabindex="-1">Version Control and Documentation <a class="direct-link" href="#version-control-and-documentation" aria-hidden="true"></a></h3>
+<p>With dbt, all your data models are version controlled and can be thoroughly documented, fostering a well-organized and reliable data architecture:</p>
+<pre class="code-block language-bash"><code class=" language-bash"># Generate documentation
+$ dbt docs generate
+
+# Serve documentation
+$ dbt docs serve
+</code></pre><h3 id="conclusion" tabindex="-1">Conclusion <a class="direct-link" href="#conclusion" aria-hidden="true"></a></h3>
+<p>dbt is a pivotal tool for modern analytics engineering, allowing for streamlined, version-controlled, and well-documented data transformation workflows entirely in SQL. By harnessing the power of dbt, data teams can build a robust analytics foundation, enabling insightful data-driven decisions across the organization. The ease of use, combined with powerful features like materializations and testing, make dbt an invaluable asset in any data engineer’s toolkit.</p>
+
+        </div>
+
+        
+
+        <nav class="article-navigation">
+          
+            
+            
+
+            <div class="article-navigation-prev">
+              
+                <span class="article-navigation-label">Previous Article</span>
+                <a href="/_posts/2023-10-24-poetry/">Mastering Dependencies with Poetry: An Expert&#39;s Guide</a>
+              
+            </div>
+
+            <div class="article-navigation-next text-right">
+              
+                <span class="article-navigation-label">Next Article</span>
+                <a href="/_posts/2022-11-03-gcp-network/">Navigating GCP Network: A Closer Look at Key Features</a>
+              
+            </div>
+          
+        </nav>
+      </article>
+    </div>
+
+    <div class="col-lg-4">
+      <aside class="sidebar">
+        <div class="sidebar-sticky">
+          <div class="sidebar-box">
+            <h3 class="sidebar-title">About</h3>
+            <p>Modern cloud, data, and AI architecture</p>
+            <a href="/about/" class="btn btn-outline-primary btn-sm">Learn more</a>
+          </div>
+          
+          <div class="sidebar-box">
+            <h3 class="sidebar-title">Stay Connected</h3>
+            <div class="social-media">
+              <a href="https://github.com/AbdelfattahAbouelaoualim" target="_blank" title="GitHub">
+                <i class="fab fa-github"></i>
+              </a>
+              <a href="https://www.linkedin.com/in/ia-ds-bg/" target="_blank" title="LinkedIn">
+                <i class="fab fa-linkedin-in"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div> 
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-4 mb-4">
+          <h5>About</h5>
+          <p>Modern cloud, data, and AI architecture</p>
+          <div class="social-media mt-3">
+            <a href="https://github.com/AbdelfattahAbouelaoualim" target="_blank" title="GitHub">
+              <i class="fab fa-github"></i>
+            </a>
+            <a href="https://www.linkedin.com/in/ia-ds-bg/" target="_blank" title="LinkedIn">
+              <i class="fab fa-linkedin-in"></i>
+            </a>
+          </div>
+        </div>
+        <div class="col-lg-4 mb-4">
+          <h5>Quick Links</h5>
+          <ul>
+            <li>
+              <a href="/">Home</a>
+            </li>
+            <li>
+              <a href="/about/">About</a>
+            </li>
+            <li>
+              <a href="/author/">Author</a>
+            </li>
+            <li>
+              <a href="/contact/">Contact</a>
+            </li>
+          </ul>
+        </div>
+        <div class="col-lg-4">
+          <h5>Categories</h5>
+          <ul>
+            
+            <li>
+              <a href="/categories/#computer-science">Computer Science</a>
+            </li>
+            
+            
+            <li>
+              <a href="/categories/#data-engineering">Data Engineering</a>
+            </li>
+            
+            
+            <li>
+              <a href="/categories/#mathematics">Mathematics</a>
+            </li>
+            
+            
+            <li>
+              <a href="/categories/#graph-theory">Graph Theory</a>
+            </li>
+            
+            
+            <li>
+              <a href="/categories/#machine-learning">Machine Learning</a>
+            </li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 The Architect | Made with <i class="fas fa-heart text-danger"></i></p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Back to Top Button -->
+  <div id="back-to-top" class="d-none">
+    <a href="#" class="btn btn-primary btn-sm rounded-circle">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Back to top button
+    $(window).scroll(function() {
+      if ($(this).scrollTop() > 300) {
+        $('#back-to-top').removeClass('d-none').addClass('d-block');
+      } else {
+        $('#back-to-top').removeClass('d-block').addClass('d-none');
+      }
+    });
+    
+    $('#back-to-top a').click(function(e) {
+      e.preventDefault();
+      $('html, body').animate({scrollTop: 0}, 300);
+      return false;
+    });
+  </script>
+</body>
+</html> 

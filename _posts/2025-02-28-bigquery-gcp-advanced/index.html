@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BigQuery: Advanced Data Management on GCP | The Architect</title>
+  <meta name="description" content="Modern cloud, data, and AI architecture">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="/css/styles.css">
+  
+  <!-- Prism CSS for code syntax highlighting -->
+  <link rel="stylesheet" href="/css/prism.css">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+</head>
+<body>
+  
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+    <div class="container">
+      <a class="navbar-brand" href="/">The Architect</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item ">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+          <li class="nav-item ">
+            <a class="nav-link" href="/about/">About</a>
+          </li>
+          <li class="nav-item ">
+            <a class="nav-link" href="/author/">Author</a>
+          </li>
+          <li class="nav-item ">
+            <a class="nav-link" href="/contact/">Contact</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main>
+    
+<div class="container">
+  <div class="row">
+    <div class="col-lg-8">
+      <article class="post">
+        <header class="article-header">
+          <h1 class="article-title">BigQuery: Advanced Data Management on GCP</h1>
+          <div class="article-meta">
+            <span><i class="far fa-calendar-alt mr-1"></i> 28 Feb 2025</span>
+            
+            <span class="ml-3">
+              <i class="far fa-folder-open mr-1"></i><a href="/categories/#data-engineering">Data Engineering</a>, <a href="/categories/#cloud-computing">Cloud Computing</a>, <a href="/categories/#gcp">GCP</a></span>
+            
+          </div>
+        </header>
+
+        
+        <div class="article-image mb-4">
+          <img src="/img/bigquery-gcp.png" alt="BigQuery: Advanced Data Management on GCP" class="img-fluid w-100">
+        </div>
+        
+
+        <div class="article-content">
+          <style>
+  @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap');
+  
+  body {
+      font-family: 'Open Sans', sans-serif;
+  }
+
+  h1 {
+    font-family: 'Roboto', sans-serif;
+    color: #007bff;
+    margin-top: 30px;
+  }
+
+  h3 {
+    font-family: 'Roboto', sans-serif;
+    color: #007bff;
+    margin-top: 30px;
+  }
+
+  h4 {
+    font-family: 'Roboto', sans-serif;
+    color: #EA950B;
+    margin-top: 30px;
+  }
+
+  pre {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+  }
+
+  h1::before, h2::before, h3::before, h4::before, h5::before, h6::before {
+    content: none !important;
+    display: none !important;
+  }
+</style>
+<h3 id="introduction" tabindex="-1">Introduction <a class="direct-link" href="#introduction" aria-hidden="true"></a></h3>
+<p>BigQuery is a fully managed, serverless data warehouse on Google Cloud Platform that enables ultra-fast SQL queries on large volumes of data. In this post, we’ll explore BigQuery’s latest advances in data organization, management, and optimization, focusing on namespace usage, different table types, industrialization and refactoring, schema management, and access control.</p>
+<h3 id="1-namespaces" tabindex="-1">1. Namespaces <a class="direct-link" href="#1-namespaces" aria-hidden="true"></a></h3>
+<p>Namespaces are essential for organizing and understanding data structure, especially when data volume becomes challenging to manage.</p>
+<h4 id="definition" tabindex="-1">Definition <a class="direct-link" href="#definition" aria-hidden="true"></a></h4>
+<p>A namespace helps contextualize data and facilitates team collaboration.</p>
+<h4 id="use-case-dark-launch" tabindex="-1">Use Case: Dark Launch <a class="direct-link" href="#use-case-dark-launch" aria-hidden="true"></a></h4>
+<ul>
+<li><strong>Context:</strong> Testing new algorithms without impacting production.</li>
+<li><strong>Example:</strong> Creating datasets like <code>gold_data_new</code> or <code>gold_data_algorithm_test</code>.</li>
+<li><strong>Benefits:</strong>
+<ul>
+<li>Avoids long pull requests.</li>
+<li>Facilitates data comparison between environments.</li>
+</ul>
+</li>
+</ul>
+<h4 id="use-case-concurrent-work" tabindex="-1">Use Case: Concurrent Work <a class="direct-link" href="#use-case-concurrent-work" aria-hidden="true"></a></h4>
+<ul>
+<li><strong>Context:</strong> Allows multiple developers to work simultaneously on the same data during development.</li>
+<li><strong>Example:</strong> Using Dataform to manage namespaces, although DBT requires more manual configuration.</li>
+<li><strong>Benefits:</strong>
+<ul>
+<li>Enhanced collaboration.</li>
+<li>Reduced conflicts in development environment.</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-table-types" tabindex="-1">2. Table Types <a class="direct-link" href="#2-table-types" aria-hidden="true"></a></h3>
+<p>BigQuery offers several table types suited for different use cases:</p>
+<h4 id="clone" tabindex="-1">Clone <a class="direct-link" href="#clone" aria-hidden="true"></a></h4>
+<ul>
+<li><strong>Description:</strong><br>
+A table copy that doesn’t consume additional space until data changes. Only modifications (insertions, updates) are counted in storage.</li>
+<li><strong>Use Case:</strong><br>
+Enables development and testing on production data copy without duplicating storage costs.</li>
+</ul>
+<h4 id="snapshot" tabindex="-1">Snapshot <a class="direct-link" href="#snapshot" aria-hidden="true"></a></h4>
+<ul>
+<li><strong>Description:</strong><br>
+A point-in-time image of a table, immutable and ideal for maintaining history.</li>
+<li><strong>Differences from Clone:</strong>
+<ul>
+<li><strong>Clone:</strong> Can be modified after creation.</li>
+<li><strong>Snapshot:</strong> Immutable, allowing return to a precise previous state.</li>
+</ul>
+</li>
+</ul>
+<h4 id="time-travel" tabindex="-1">Time Travel <a class="direct-link" href="#time-travel" aria-hidden="true"></a></h4>
+<ul>
+<li><strong>Feature:</strong><br>
+Enables returning to a previous data state using features leveraged by clones and snapshots.</li>
+</ul>
+<h4 id="external-table" tabindex="-1">External Table <a class="direct-link" href="#external-table" aria-hidden="true"></a></h4>
+<ul>
+<li><strong>Description:</strong><br>
+Allows querying data stored outside BigQuery, such as files in Google Cloud Storage or Google Sheets.</li>
+<li><strong>Use Case:</strong><br>
+Directly read a Google Sheet or query files stored in various storage environments.</li>
+</ul>
+<h4 id="materialized-view" tabindex="-1">Materialized View <a class="direct-link" href="#materialized-view" aria-hidden="true"></a></h4>
+<ul>
+<li><strong>Description:</strong><br>
+A view with pre-calculated and stored results, optimizing query performance.</li>
+<li><strong>Benefits:</strong>
+<ul>
+<li>Cost reduction.</li>
+<li>Stable consumption interface.</li>
+<li>Possibility to use <strong>query routing</strong> for improved performance.</li>
+</ul>
+</li>
+</ul>
+<pre class="code-block language-sql"><code class=" language-sql">-- Example of creating a materialized view
+CREATE MATERIALIZED VIEW my_dataset.my_materialized_view AS
+SELECT column1, COUNT(*) AS count
+FROM my_dataset.my_table
+GROUP BY column1;
+</code></pre><h3 id="3-industrialization-and-refactoring" tabindex="-1">3. Industrialization and Refactoring <a class="direct-link" href="#3-industrialization-and-refactoring" aria-hidden="true"></a></h3>
+<p>Industrialization enables structured evolution and refactoring of a data system.</p>
+<ul>
+<li><strong>Namespace Usage:</strong><br>
+Separate test and production environments to facilitate collaborative development.</li>
+<li><strong>Dark Launch:</strong><br>
+Test new versions in production without impacting existing environment.</li>
+<li><strong>Benefits:</strong><br>
+Safer and iterative deployments.<br>
+Improved collaboration between development and operations teams.</li>
+</ul>
+
+        </div>
+
+        
+
+        <nav class="article-navigation">
+          
+            
+            
+
+            <div class="article-navigation-prev">
+              
+            </div>
+
+            <div class="article-navigation-next text-right">
+              
+                <span class="article-navigation-label">Next Article</span>
+                <a href="/_posts/2023-11-21-neo4j/">Exploring Neo4j in 2023: The Evolution of Graph Databases</a>
+              
+            </div>
+          
+        </nav>
+      </article>
+    </div>
+
+    <div class="col-lg-4">
+      <aside class="sidebar">
+        <div class="sidebar-sticky">
+          <div class="sidebar-box">
+            <h3 class="sidebar-title">About</h3>
+            <p>Modern cloud, data, and AI architecture</p>
+            <a href="/about/" class="btn btn-outline-primary btn-sm">Learn more</a>
+          </div>
+          
+          <div class="sidebar-box">
+            <h3 class="sidebar-title">Stay Connected</h3>
+            <div class="social-media">
+              <a href="https://github.com/AbdelfattahAbouelaoualim" target="_blank" title="GitHub">
+                <i class="fab fa-github"></i>
+              </a>
+              <a href="https://www.linkedin.com/in/ia-ds-bg/" target="_blank" title="LinkedIn">
+                <i class="fab fa-linkedin-in"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div> 
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-4 mb-4">
+          <h5>About</h5>
+          <p>Modern cloud, data, and AI architecture</p>
+          <div class="social-media mt-3">
+            <a href="https://github.com/AbdelfattahAbouelaoualim" target="_blank" title="GitHub">
+              <i class="fab fa-github"></i>
+            </a>
+            <a href="https://www.linkedin.com/in/ia-ds-bg/" target="_blank" title="LinkedIn">
+              <i class="fab fa-linkedin-in"></i>
+            </a>
+          </div>
+        </div>
+        <div class="col-lg-4 mb-4">
+          <h5>Quick Links</h5>
+          <ul>
+            <li>
+              <a href="/">Home</a>
+            </li>
+            <li>
+              <a href="/about/">About</a>
+            </li>
+            <li>
+              <a href="/author/">Author</a>
+            </li>
+            <li>
+              <a href="/contact/">Contact</a>
+            </li>
+          </ul>
+        </div>
+        <div class="col-lg-4">
+          <h5>Categories</h5>
+          <ul>
+            
+            <li>
+              <a href="/categories/#computer-science">Computer Science</a>
+            </li>
+            
+            
+            <li>
+              <a href="/categories/#data-engineering">Data Engineering</a>
+            </li>
+            
+            
+            <li>
+              <a href="/categories/#mathematics">Mathematics</a>
+            </li>
+            
+            
+            <li>
+              <a href="/categories/#graph-theory">Graph Theory</a>
+            </li>
+            
+            
+            <li>
+              <a href="/categories/#machine-learning">Machine Learning</a>
+            </li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 The Architect | Made with <i class="fas fa-heart text-danger"></i></p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Back to Top Button -->
+  <div id="back-to-top" class="d-none">
+    <a href="#" class="btn btn-primary btn-sm rounded-circle">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Back to top button
+    $(window).scroll(function() {
+      if ($(this).scrollTop() > 300) {
+        $('#back-to-top').removeClass('d-none').addClass('d-block');
+      } else {
+        $('#back-to-top').removeClass('d-block').addClass('d-none');
+      }
+    });
+    
+    $('#back-to-top a').click(function(e) {
+      e.preventDefault();
+      $('html, body').animate({scrollTop: 0}, 300);
+      return false;
+    });
+  </script>
+</body>
+</html> 

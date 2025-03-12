@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test d'image</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+      border: 2px solid #ccc;
+    }
+    .test-section {
+      margin: 20px 0;
+      padding: 20px;
+      border: 1px solid #eee;
+    }
+  </style>
+</head>
+<body>
+  <h1>Test de l'image hero-banner.jpg</h1>
+  
+  <div class="test-section">
+    <h2>Test avec balise img (chemin absolu)</h2>
+    <img src="/img/hero-banner.jpg" alt="Hero Banner (absolu)">
+  </div>
+  
+  <div class="test-section">
+    <h2>Test avec balise img (chemin relatif)</h2>
+    <img src="img/hero-banner.jpg" alt="Hero Banner (relatif)">
+  </div>
+  
+  <div class="test-section">
+    <h2>Test avec background-image (chemin absolu)</h2>
+    <div style="width: 100%; height: 300px; background-image: url('/img/hero-banner.jpg'); background-size: cover; background-position: center;"></div>
+  </div>
+  
+  <div class="test-section">
+    <h2>Test avec background-image (chemin relatif)</h2>
+    <div style="width: 100%; height: 300px; background-image: url('img/hero-banner.jpg'); background-size: cover; background-position: center;"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Autres images pour référence</h2>
+    <img src="/img/hero-bg.jpg" alt="Hero BG" style="max-width: 300px;">
+  </div>
+</body>
+</html> 

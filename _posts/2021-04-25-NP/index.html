@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How to transfer a Neo4j graph to a Python graph | The Architect</title>
+  <meta name="description" content="A complete post.">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="/css/styles.css">
+  
+  <!-- Prism CSS for code syntax highlighting -->
+  <link rel="stylesheet" href="/css/prism.css">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+</head>
+<body>
+  
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+    <div class="container">
+      <a class="navbar-brand" href="/">The Architect</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item ">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+          <li class="nav-item ">
+            <a class="nav-link" href="/about/">About</a>
+          </li>
+          <li class="nav-item ">
+            <a class="nav-link" href="/author/">Author</a>
+          </li>
+          <li class="nav-item ">
+            <a class="nav-link" href="/contact/">Contact</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main>
+    
+<div class="container">
+  <div class="row">
+    <div class="col-lg-8">
+      <article class="post">
+        <header class="article-header">
+          <h1 class="article-title">How to transfer a Neo4j graph to a Python graph</h1>
+          <div class="article-meta">
+            <span><i class="far fa-calendar-alt mr-1"></i> 25 Apr 2021</span>
+            
+            <span class="ml-3">
+              <i class="far fa-folder-open mr-1"></i><a href="/categories/#data-science">Data Science</a></span>
+            
+          </div>
+        </header>
+
+        
+        <div class="article-image mb-4">
+          <img src="/img/ntop.png" alt="How to transfer a Neo4j graph to a Python graph" class="img-fluid w-100">
+        </div>
+        
+
+        <div class="article-content">
+          <style>
+  @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap');
+  
+  body {
+      font-family: 'Open Sans', sans-serif;
+  }
+
+  h1 {
+    font-family: 'Roboto', sans-serif;
+    color: #007bff;
+    margin-top: 30px;
+  }
+
+  h3 {
+    font-family: 'Roboto', sans-serif;
+    color: #007bff;
+    margin-top: 30px;
+  }
+
+  h4 {
+    font-family: 'Roboto', sans-serif;
+    color: #EA950B;
+    margin-top: 30px;
+  }
+
+  pre {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+  }
+</style>
+<p>Neo4j contains libraries such as GDS and APOC which allow the use of already existing advanced methods and algorithms. But if that’s not enough, in this jupyter notebook, I want to show that we can get the results of Cypher queries on a Python environment and using specialized graph libraries such as networkx we can use advanced algorithms, make measurements and machine learning over graphs.</p>
+<pre class="code-block language-python"><code class=" language-python">! pip install neo4j
+</code></pre><pre class="code-block language-python"><code class=" language-python">! pip install py2neo
+</code></pre><pre class="code-block language-python"><code class=" language-python">from neo4j import GraphDatabase
+</code></pre><pre class="code-block language-python"><code class=" language-python">uri = "neo4j://localhost:7687"
+</code></pre><pre class="code-block language-python"><code class=" language-python">connect = GraphDatabase.driver(uri, auth=("neo4j", "************"))
+</code></pre><pre class="code-block language-python"><code class=" language-python">session = connect.session()
+</code></pre><pre class="code-block language-python"><code class=" language-python">query = "match (n)-[p]->(m), (m)-[r]->(j) return *"
+</code></pre><pre class="code-block language-python"><code class=" language-python">results = session.run(query)
+</code></pre><pre class="code-block language-python"><code class=" language-python">import networkx as nx
+</code></pre><pre class="code-block language-python"><code class=" language-python">G = nx.Graph()
+
+nodes = list(results.graph()._nodes.values())
+for node in nodes:
+    G.add_node(node.id, labels=node._labels, properties=node._properties)
+
+rels = list(results.graph()._relationships.values())
+for rel in rels:
+    G.add_edge(rel.start_node.id, rel.end_node.id, key=rel.id, type=rel.type, properties=rel._properties)
+</code></pre><pre class="code-block language-python"><code class=" language-python">import matplotlib.pyplot as plt
+%matplotlib inline
+plt.style.use('ggplot')
+</code></pre><pre class="code-block language-python"><code class=" language-python">options = {
+    'node_color': 'blue',
+    'node_size': 800,
+    'width': 5,
+    
+}
+plt.figure(figsize = (100,100))
+nx.draw(G, with_labels = False, **options)
+plt.show()
+</code></pre><p><img src="/img/Neo4j_to_Python/output_12_1.png" alt="png"></p>
+<pre class="code-block language-python"><code class=" language-python">print(nx.info(G))
+</code></pre><p>Name:<br>
+Type: Graph<br>
+Number of nodes: 1411<br>
+Number of edges: 1679<br>
+Average degree:   2.3799</p>
+<pre class="code-block language-python"><code class=" language-python">degree_freq = nx.degree_histogram(G)
+y = degree_freq
+plt.figure(figsize=(8, 8))
+plt.stem(y)
+plt.ylabel("Frequence")
+plt.xlabel("Degre")
+</code></pre><p><img src="/img/Neo4j_to_Python/output_14_2.png" alt="png"></p>
+<pre class="code-block language-python"><code class=" language-python">plt.figure(figsize=(8, 8))
+plt.loglog(y, 'b-')
+plt.ylabel("log-Frequence")
+plt.xlabel("log-Degre")
+</code></pre><p><img src="/img/Neo4j_to_Python/output_15_1.png" alt="png"></p>
+<pre class="code-block language-python"><code class=" language-python">degrees = sorted(G.degree, key=lambda x: x[1], reverse=True)
+print(f'Maximum degree: {degrees[0][1]}')
+print(f'Minimum degree: {degrees[-1][1]}')
+</code></pre><p>Maximum degree: 97<br>
+Minimum degree: 1</p>
+<pre class="code-block language-python"><code class=" language-python">def get_second_elem(iterable):
+    return iterable[1]
+</code></pre><pre class="code-block language-python"><code class=" language-python">all_deg = sorted(nx.degree_centrality(G).items(),key=get_second_elem, reverse=True)
+print("The 10 nodes with the greatest degree_centrality:")
+for node in all_deg[0:10]:
+    print(node)
+</code></pre><p>The 10 nodes with the greatest degree_centrality:<br>
+(4180, 0.06879432624113475)<br>
+(4197, 0.0673758865248227)<br>
+(4206, 0.03475177304964539)<br>
+(4190, 0.030496453900709222)<br>
+(4145, 0.024113475177304965)<br>
+(4175, 0.024113475177304965)<br>
+(4152, 0.02340425531914894)<br>
+(4198, 0.02340425531914894)<br>
+(4140, 0.02269503546099291)<br>
+(4199, 0.02269503546099291)</p>
+<pre class="code-block language-python"><code class=" language-python">for d in all_deg:
+    found_first_author_max_degree = False
+    for node in nodes:
+        if (node._labels == {'author'}) and (node._id == d[0]):
+            print(f"The author {node._id} has the max degree centrality {d[1]}")
+            print("His name: ",node._properties['name'])
+            print("His topic: ",node._properties['topic'])
+            found_first_author_max_degree = True
+            break
+    if found_first_author_max_degree:
+        break
+    
+</code></pre><p>The author 4001 has the max degree centrality 0.005673758865248227<br>
+His name:   Attwood, Kristopher M<br>
+His topic:  sarcopenia</p>
+
+        </div>
+
+        
+
+        <nav class="article-navigation">
+          
+            
+            
+
+            <div class="article-navigation-prev">
+              
+                <span class="article-navigation-label">Previous Article</span>
+                <a href="/_posts/2021-04-18-NodeClassification/">How to do node classification and choose important features</a>
+              
+            </div>
+
+            <div class="article-navigation-next text-right">
+              
+                <span class="article-navigation-label">Next Article</span>
+                <a href="/_posts/2021-02-06-bandit/">Multi-armed bandits</a>
+              
+            </div>
+          
+        </nav>
+      </article>
+    </div>
+
+    <div class="col-lg-4">
+      <aside class="sidebar">
+        <div class="sidebar-sticky">
+          <div class="sidebar-box">
+            <h3 class="sidebar-title">About</h3>
+            <p>Modern cloud, data, and AI architecture</p>
+            <a href="/about/" class="btn btn-outline-primary btn-sm">Learn more</a>
+          </div>
+          
+          <div class="sidebar-box">
+            <h3 class="sidebar-title">Stay Connected</h3>
+            <div class="social-media">
+              <a href="https://github.com/AbdelfattahAbouelaoualim" target="_blank" title="GitHub">
+                <i class="fab fa-github"></i>
+              </a>
+              <a href="https://www.linkedin.com/in/ia-ds-bg/" target="_blank" title="LinkedIn">
+                <i class="fab fa-linkedin-in"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div> 
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-4 mb-4">
+          <h5>About</h5>
+          <p>Modern cloud, data, and AI architecture</p>
+          <div class="social-media mt-3">
+            <a href="https://github.com/AbdelfattahAbouelaoualim" target="_blank" title="GitHub">
+              <i class="fab fa-github"></i>
+            </a>
+            <a href="https://www.linkedin.com/in/ia-ds-bg/" target="_blank" title="LinkedIn">
+              <i class="fab fa-linkedin-in"></i>
+            </a>
+          </div>
+        </div>
+        <div class="col-lg-4 mb-4">
+          <h5>Quick Links</h5>
+          <ul>
+            <li>
+              <a href="/">Home</a>
+            </li>
+            <li>
+              <a href="/about/">About</a>
+            </li>
+            <li>
+              <a href="/author/">Author</a>
+            </li>
+            <li>
+              <a href="/contact/">Contact</a>
+            </li>
+          </ul>
+        </div>
+        <div class="col-lg-4">
+          <h5>Categories</h5>
+          <ul>
+            
+            <li>
+              <a href="/categories/#computer-science">Computer Science</a>
+            </li>
+            
+            
+            <li>
+              <a href="/categories/#data-engineering">Data Engineering</a>
+            </li>
+            
+            
+            <li>
+              <a href="/categories/#mathematics">Mathematics</a>
+            </li>
+            
+            
+            <li>
+              <a href="/categories/#graph-theory">Graph Theory</a>
+            </li>
+            
+            
+            <li>
+              <a href="/categories/#machine-learning">Machine Learning</a>
+            </li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 The Architect | Made with <i class="fas fa-heart text-danger"></i></p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Back to Top Button -->
+  <div id="back-to-top" class="d-none">
+    <a href="#" class="btn btn-primary btn-sm rounded-circle">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Back to top button
+    $(window).scroll(function() {
+      if ($(this).scrollTop() > 300) {
+        $('#back-to-top').removeClass('d-none').addClass('d-block');
+      } else {
+        $('#back-to-top').removeClass('d-block').addClass('d-none');
+      }
+    });
+    
+    $('#back-to-top a').click(function(e) {
+      e.preventDefault();
+      $('html, body').animate({scrollTop: 0}, 300);
+      return false;
+    });
+  </script>
+</body>
+</html> 

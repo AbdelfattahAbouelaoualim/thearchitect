@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sailing the Clouds: Docker, GKE, and Terraform | The Architect</title>
+  <meta name="description" content="Modern cloud, data, and AI architecture">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="/css/styles.css">
+  
+  <!-- Prism CSS for code syntax highlighting -->
+  <link rel="stylesheet" href="/css/prism.css">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+</head>
+<body>
+  
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+    <div class="container">
+      <a class="navbar-brand" href="/">The Architect</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item ">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+          <li class="nav-item ">
+            <a class="nav-link" href="/about/">About</a>
+          </li>
+          <li class="nav-item ">
+            <a class="nav-link" href="/author/">Author</a>
+          </li>
+          <li class="nav-item ">
+            <a class="nav-link" href="/contact/">Contact</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main>
+    
+<div class="container">
+  <div class="row">
+    <div class="col-lg-8">
+      <article class="post">
+        <header class="article-header">
+          <h1 class="article-title">Sailing the Clouds: Docker, GKE, and Terraform</h1>
+          <div class="article-meta">
+            <span><i class="far fa-calendar-alt mr-1"></i> 25 Oct 2023</span>
+            
+            <span class="ml-3">
+              <i class="far fa-folder-open mr-1"></i><a href="/categories/#devops">DevOps</a>, <a href="/categories/#cloud-computing">Cloud Computing</a></span>
+            
+          </div>
+        </header>
+
+        
+        <div class="article-image mb-4">
+          <img src="/img/terraform_docker.png" alt="Sailing the Clouds: Docker, GKE, and Terraform" class="img-fluid w-100">
+        </div>
+        
+
+        <div class="article-content">
+          <style>
+  @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap');
+  
+  body {
+      font-family: 'Open Sans', sans-serif;
+  }
+
+  h1 {
+    font-family: 'Roboto', sans-serif;
+    color: #007bff;
+    margin-top: 30px;
+  }
+
+  h3 {
+    font-family: 'Roboto', sans-serif;
+    color: #007bff;
+    margin-top: 30px;
+  }
+
+  h4 {
+    font-family: 'Roboto', sans-serif;
+    color: #EA950B;
+    margin-top: 30px;
+  }
+
+  pre {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+  }
+</style>
+<h3 id="introduction" tabindex="-1">Introduction <a class="direct-link" href="#introduction" aria-hidden="true"></a></h3>
+<p>The cloud-native ecosystem is bustling with tools that facilitate container orchestration, infrastructure as code, and seamless deployment. Among these tools, Docker, Google Kubernetes Engine (GKE), and Terraform stand out for their robustness and ease of use. This article unfolds the synergy between these tools and demonstrates how they can be leveraged to sail smoothly through the cloud-native waters.</p>
+<h3 id="docker-containerization-at-its-best" tabindex="-1">Docker: Containerization at its Best <a class="direct-link" href="#docker-containerization-at-its-best" aria-hidden="true"></a></h3>
+<p>Docker is a platform that enables developers to create, deploy, and run applications in containers. Containers allow a developer to package up an application with all parts it needs, such as libraries and other dependencies, and ship it all out as one package.</p>
+<h4 id="example-dockerizing-a-simple-application" tabindex="-1">Example: Dockerizing a Simple Application <a class="direct-link" href="#example-dockerizing-a-simple-application" aria-hidden="true"></a></h4>
+<pre class="code-block language-bash"><code class=" language-bash"># Create a Dockerfile
+echo '
+FROM python:3.8-slim-buster
+
+WORKDIR /app
+
+COPY requirements.txt requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+CMD ["python", "app.py"]
+' > Dockerfile
+
+# Build the Docker image
+docker build -t my-app .
+</code></pre><h3 id="gke-orchestrate-containers-with-kubernetes" tabindex="-1">GKE: Orchestrate Containers with Kubernetes <a class="direct-link" href="#gke-orchestrate-containers-with-kubernetes" aria-hidden="true"></a></h3>
+<p>Google Kubernetes Engine (GKE) provides a managed environment for deploying, managing, and scaling your containerized applications using Google infrastructure. It leverages Kubernetes, the open-source container orchestration system.</p>
+<h4 id="example-deploying-to-gke" tabindex="-1">Example: Deploying to GKE <a class="direct-link" href="#example-deploying-to-gke" aria-hidden="true"></a></h4>
+<pre class="code-block language-bash"><code class=" language-bash"># Create a Kubernetes deployment configuration
+echo '
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: my-app
+        image: gcr.io/my-project/my-app:latest
+' > deployment.yaml
+
+# Deploy to GKE
+kubectl apply -f deployment.yaml
+</code></pre><h3 id="terraform-infrastructure-as-code" tabindex="-1">Terraform: Infrastructure as Code <a class="direct-link" href="#terraform-infrastructure-as-code" aria-hidden="true"></a></h3>
+<p>Terraform is an open-source infrastructure as code software tool that enables users to define and provision a datacenter infrastructure using a high-level configuration language.</p>
+<h4 id="example-provisioning-gke-cluster-using-terraform" tabindex="-1">Example: Provisioning GKE Cluster using Terraform <a class="direct-link" href="#example-provisioning-gke-cluster-using-terraform" aria-hidden="true"></a></h4>
+<pre class="code-block language-hcl"><code class=" language-hcl">provider "google" {
+  credentials = file("<YOUR-GCP-JSON-KEY>")
+  project     = "<YOUR-GCP-PROJECT>"
+  region      = "us-central1"
+}
+
+resource "google_container_cluster" "primary" {
+  name     = "my-gke-cluster"
+  location = "us-central1-a"
+
+  remove_default_node_pool = true
+  initial_node_count       = 1
+
+  master_auth {
+    username = ""
+    password = ""
+
+    client_certificate_config {
+      issue_client_certificate = false
+    }
+  }
+}
+
+output "cluster_endpoint" {
+  value = google_container_cluster.primary.endpoint
+}
+</code></pre><h3 id="conclusion" tabindex="-1">Conclusion <a class="direct-link" href="#conclusion" aria-hidden="true"></a></h3>
+<p>Embracing Docker, GKE, and Terraform can significantly streamline the deployment and management of cloud-native applications. By containerizing applications with Docker, orchestrating them with GKE, and provisioning infrastructure with Terraform, developers and operations teams can ensure consistency, scalability, and reliability across the development lifecycle.</p>
+
+        </div>
+
+        
+
+        <nav class="article-navigation">
+          
+            
+            
+
+            <div class="article-navigation-prev">
+              
+                <span class="article-navigation-label">Previous Article</span>
+                <a href="/_posts/2023-10-27-azuredevops/">Navigating Continuous Data Pipelines: An Extensive Look into CI/CD with Azure DevOps, dbt, Airflow, GCS, and BigQuery</a>
+              
+            </div>
+
+            <div class="article-navigation-next text-right">
+              
+                <span class="article-navigation-label">Next Article</span>
+                <a href="/_posts/2023-10-24-poetry/">Mastering Dependencies with Poetry: An Expert&#39;s Guide</a>
+              
+            </div>
+          
+        </nav>
+      </article>
+    </div>
+
+    <div class="col-lg-4">
+      <aside class="sidebar">
+        <div class="sidebar-sticky">
+          <div class="sidebar-box">
+            <h3 class="sidebar-title">About</h3>
+            <p>Modern cloud, data, and AI architecture</p>
+            <a href="/about/" class="btn btn-outline-primary btn-sm">Learn more</a>
+          </div>
+          
+          <div class="sidebar-box">
+            <h3 class="sidebar-title">Stay Connected</h3>
+            <div class="social-media">
+              <a href="https://github.com/AbdelfattahAbouelaoualim" target="_blank" title="GitHub">
+                <i class="fab fa-github"></i>
+              </a>
+              <a href="https://www.linkedin.com/in/ia-ds-bg/" target="_blank" title="LinkedIn">
+                <i class="fab fa-linkedin-in"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div> 
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-4 mb-4">
+          <h5>About</h5>
+          <p>Modern cloud, data, and AI architecture</p>
+          <div class="social-media mt-3">
+            <a href="https://github.com/AbdelfattahAbouelaoualim" target="_blank" title="GitHub">
+              <i class="fab fa-github"></i>
+            </a>
+            <a href="https://www.linkedin.com/in/ia-ds-bg/" target="_blank" title="LinkedIn">
+              <i class="fab fa-linkedin-in"></i>
+            </a>
+          </div>
+        </div>
+        <div class="col-lg-4 mb-4">
+          <h5>Quick Links</h5>
+          <ul>
+            <li>
+              <a href="/">Home</a>
+            </li>
+            <li>
+              <a href="/about/">About</a>
+            </li>
+            <li>
+              <a href="/author/">Author</a>
+            </li>
+            <li>
+              <a href="/contact/">Contact</a>
+            </li>
+          </ul>
+        </div>
+        <div class="col-lg-4">
+          <h5>Categories</h5>
+          <ul>
+            
+            <li>
+              <a href="/categories/#computer-science">Computer Science</a>
+            </li>
+            
+            
+            <li>
+              <a href="/categories/#data-engineering">Data Engineering</a>
+            </li>
+            
+            
+            <li>
+              <a href="/categories/#mathematics">Mathematics</a>
+            </li>
+            
+            
+            <li>
+              <a href="/categories/#graph-theory">Graph Theory</a>
+            </li>
+            
+            
+            <li>
+              <a href="/categories/#machine-learning">Machine Learning</a>
+            </li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 The Architect | Made with <i class="fas fa-heart text-danger"></i></p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Back to Top Button -->
+  <div id="back-to-top" class="d-none">
+    <a href="#" class="btn btn-primary btn-sm rounded-circle">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Back to top button
+    $(window).scroll(function() {
+      if ($(this).scrollTop() > 300) {
+        $('#back-to-top').removeClass('d-none').addClass('d-block');
+      } else {
+        $('#back-to-top').removeClass('d-block').addClass('d-none');
+      }
+    });
+    
+    $('#back-to-top a').click(function(e) {
+      e.preventDefault();
+      $('html, body').animate({scrollTop: 0}, 300);
+      return false;
+    });
+  </script>
+</body>
+</html> 

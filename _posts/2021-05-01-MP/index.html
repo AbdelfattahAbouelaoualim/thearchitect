@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How to use MongoDb with Python | The Architect</title>
+  <meta name="description" content="A complete post.">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="/css/styles.css">
+  
+  <!-- Prism CSS for code syntax highlighting -->
+  <link rel="stylesheet" href="/css/prism.css">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+</head>
+<body>
+  
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+    <div class="container">
+      <a class="navbar-brand" href="/">The Architect</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item ">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+          <li class="nav-item ">
+            <a class="nav-link" href="/about/">About</a>
+          </li>
+          <li class="nav-item ">
+            <a class="nav-link" href="/author/">Author</a>
+          </li>
+          <li class="nav-item ">
+            <a class="nav-link" href="/contact/">Contact</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main>
+    
+<div class="container">
+  <div class="row">
+    <div class="col-lg-8">
+      <article class="post">
+        <header class="article-header">
+          <h1 class="article-title">How to use MongoDb with Python</h1>
+          <div class="article-meta">
+            <span><i class="far fa-calendar-alt mr-1"></i> 01 May 2021</span>
+            
+            <span class="ml-3">
+              <i class="far fa-folder-open mr-1"></i><a href="/categories/#data-science">Data Science</a></span>
+            
+          </div>
+        </header>
+
+        
+        <div class="article-image mb-4">
+          <img src="/img/MongoDB_Python.png" alt="How to use MongoDb with Python" class="img-fluid w-100">
+        </div>
+        
+
+        <div class="article-content">
+          <style>
+  @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap');
+  
+  body {
+      font-family: 'Open Sans', sans-serif;
+  }
+
+  h1 {
+    font-family: 'Roboto', sans-serif;
+    color: #007bff;
+    margin-top: 30px;
+  }
+
+  h3 {
+    font-family: 'Roboto', sans-serif;
+    color: #007bff;
+    margin-top: 30px;
+  }
+
+  h4 {
+    font-family: 'Roboto', sans-serif;
+    color: #EA950B;
+    margin-top: 30px;
+  }
+
+  pre {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+  }
+</style>
+<p>This little tutorial shows how to use MongoDB with python.</p>
+<pre class="code-block language-python"><code class=" language-python">from pymongo import MongoClient
+import pprint
+import pandas as pd
+</code></pre><pre class="code-block language-python"><code class=" language-python">#Connect to mongodb
+client = MongoClient('mongodb://localhost:27017/', readPreference='primaryPreferred')
+</code></pre><pre class="code-block language-python"><code class=" language-python">#Connect to spark db
+db = client['Connect_to_Spark_db']
+</code></pre><pre class="code-block language-python"><code class=" language-python">mentions_events = db['mentions_events']
+</code></pre><pre class="code-block language-python"><code class=" language-python">pprint.pprint(mentions_events.find_one())
+</code></pre><h4 id="test-request-no-of-actors" tabindex="-1">Test request no. Of actors <a class="direct-link" href="#test-request-no-of-actors" aria-hidden="true"></a></h4>
+<pre class="code-block language-python"><code class=" language-python">agg=db.mentions_events.aggregate([ 
+{ "$limit": 5000000},
+{
+       "$group": {
+           "_id": {"actor":"$Actor1Name"},
+           "Count": { "$sum": 1}
+       },
+     
+    
+},
+{ "$count": "myCount" }
+])
+</code></pre><h4 id="request-1" tabindex="-1">Request 1 <a class="direct-link" href="#request-1" aria-hidden="true"></a></h4>
+<pre class="code-block language-python"><code class=" language-python"># Requete 1
+agg=db.mentions_events.aggregate([
+   { "$limit": 10000},
+   {
+       "$group": {
+           "_id": {"annee": "$yearmention", "mois": "$monthmention", "jour": "$daymonthevent", "pays":"$ActionGeo_CountryCode", "langue":"$MentionDocTranslationInfo"},
+           "Nb_Articles": { "$sum": "$NumMentions" },
+       }
+   }
+])
+</code></pre><pre class="code-block language-python"><code class=" language-python">pprint.pprint(list(agg))
+</code></pre><h4 id="request-2" tabindex="-1">Request 2 <a class="direct-link" href="#request-2" aria-hidden="true"></a></h4>
+<pre class="code-block language-python"><code class=" language-python">agg=db.mentions_events.aggregate( [
+    { $match:
+        { $or: [{"Actor1Name":"TOURIST"},{"Actor2Name":"TOURIST"}] },
+    },
+
+    { $group:
+        {_id:
+            {GLOBALEVENTID:"$GLOBALEVENTID",
+            Actor1Code:"$Actor1Code",
+            Actor1Name:"$Actor1Name",
+            Actor1CountryCode:"$Actor1CountryCode",
+            Actor2Code:"$Actor2Code",
+            Actor2Name:"$Actor2Name",
+            Actor2CountryCode:"$Actor2CountryCode",
+            EventCode:"$EventCode",
+            QuadClass:"$QuadClass",
+            SQLDATE:"$SQLDATE",
+            SOURCEURL:"$SOURCEURL"
+            }
+        }
+    }
+] );
+</code></pre><h4 id="request-3" tabindex="-1">Request 3 <a class="direct-link" href="#request-3" aria-hidden="true"></a></h4>
+<pre class="code-block language-python"><code class=" language-python">df_correspondances = 
+</code></pre><pre class="code-block language-python"><code class=" language-python">
+agg=db.mentions_events.aggregate([
+   {
+       "$project": {
+           "monthmention": 1, "ActionGeo_CountryCode": 1, "MentionDocTranslationInfo" : 1, "Actor1Name" : 1,
+           "lessThan0": { 
+               "$cond": [ { "$lt": ["MentionDocTone", 0 ] }, 1, 0]
+           },
+           "moreThan0": { 
+               "$cond": [ { "$gt": [ "MentionDocTone", 0 ] }, 1, 0]
+           }
+       }
+   },
+   { "$limit": 1000000},
+   {
+       "$group": {
+           "_id": {"mois": "$monthmention", "pays":"$ActionGeo_CountryCode", "langue":"$MentionDocTranslationInfo", "actor":"$Actor1Name"},
+           "Nb_Articles_Negatifs": { "$sum": "$lessThan0" },
+           "Nb_Articles_Positifs": { "$sum": "$moreThan0" }
+       }
+   }
+])
+
+</code></pre><pre class="code-block language-python"><code class=" language-python">pprint.pprint(list(agg))
+</code></pre><pre class="code-block language-python"><code class=" language-python">req3 = list(agg)
+</code></pre><pre class="code-block language-python"><code class=" language-python">df_3 = pd.Da
+</code></pre><p>{‘_id’: {‘mois’: 1, ‘pays’: ‘GM’, ‘langue’: ‘ara’, ‘actor’: ‘IRANIAN’},<br>
+‘Nb_Articles_Negatifs’: 0,<br>
+‘Nb_Articles_Positifs’: 3}</p>
+<h4 id="request-4" tabindex="-1">Request 4 <a class="direct-link" href="#request-4" aria-hidden="true"></a></h4>
+<pre class="code-block language-python"><code class=" language-python">
+agg = db.mentions_events.aggregate([
+ { "$limit": 10000},
+ { "$group": {
+     "_id":   { "GLOBALEVENTID": "$GLOBALEVENTID", "Actor1Name": "$Actor1Name" },
+     "avgGoldstein": { "$avg": "$GoldsteinScale" } }  },
+ { "$group": {
+     "_id": { "Actor1Name": "$_id.Actor1Name" },
+     "totalGoldstein": { "$sum": "$avgGoldstein"} }  },
+{"$sort":{"totalGoldstein":1}}
+])
+
+</code></pre><pre class="code-block language-python"><code class=" language-python">pprint.pprint(list(agg))
+</code></pre>
+        </div>
+
+        
+
+        <nav class="article-navigation">
+          
+            
+            
+
+            <div class="article-navigation-prev">
+              
+                <span class="article-navigation-label">Previous Article</span>
+                <a href="/_posts/2022-11-03-bigquery-gcp/">Unlocking Data Insights with BigQuery: A GCP Gem</a>
+              
+            </div>
+
+            <div class="article-navigation-next text-right">
+              
+                <span class="article-navigation-label">Next Article</span>
+                <a href="/_posts/2021-04-26-PN/">How to transfer a Python graph to a Neo4j graph</a>
+              
+            </div>
+          
+        </nav>
+      </article>
+    </div>
+
+    <div class="col-lg-4">
+      <aside class="sidebar">
+        <div class="sidebar-sticky">
+          <div class="sidebar-box">
+            <h3 class="sidebar-title">About</h3>
+            <p>Modern cloud, data, and AI architecture</p>
+            <a href="/about/" class="btn btn-outline-primary btn-sm">Learn more</a>
+          </div>
+          
+          <div class="sidebar-box">
+            <h3 class="sidebar-title">Stay Connected</h3>
+            <div class="social-media">
+              <a href="https://github.com/AbdelfattahAbouelaoualim" target="_blank" title="GitHub">
+                <i class="fab fa-github"></i>
+              </a>
+              <a href="https://www.linkedin.com/in/ia-ds-bg/" target="_blank" title="LinkedIn">
+                <i class="fab fa-linkedin-in"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div> 
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-4 mb-4">
+          <h5>About</h5>
+          <p>Modern cloud, data, and AI architecture</p>
+          <div class="social-media mt-3">
+            <a href="https://github.com/AbdelfattahAbouelaoualim" target="_blank" title="GitHub">
+              <i class="fab fa-github"></i>
+            </a>
+            <a href="https://www.linkedin.com/in/ia-ds-bg/" target="_blank" title="LinkedIn">
+              <i class="fab fa-linkedin-in"></i>
+            </a>
+          </div>
+        </div>
+        <div class="col-lg-4 mb-4">
+          <h5>Quick Links</h5>
+          <ul>
+            <li>
+              <a href="/">Home</a>
+            </li>
+            <li>
+              <a href="/about/">About</a>
+            </li>
+            <li>
+              <a href="/author/">Author</a>
+            </li>
+            <li>
+              <a href="/contact/">Contact</a>
+            </li>
+          </ul>
+        </div>
+        <div class="col-lg-4">
+          <h5>Categories</h5>
+          <ul>
+            
+            <li>
+              <a href="/categories/#computer-science">Computer Science</a>
+            </li>
+            
+            
+            <li>
+              <a href="/categories/#data-engineering">Data Engineering</a>
+            </li>
+            
+            
+            <li>
+              <a href="/categories/#mathematics">Mathematics</a>
+            </li>
+            
+            
+            <li>
+              <a href="/categories/#graph-theory">Graph Theory</a>
+            </li>
+            
+            
+            <li>
+              <a href="/categories/#machine-learning">Machine Learning</a>
+            </li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 The Architect | Made with <i class="fas fa-heart text-danger"></i></p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Back to Top Button -->
+  <div id="back-to-top" class="d-none">
+    <a href="#" class="btn btn-primary btn-sm rounded-circle">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Back to top button
+    $(window).scroll(function() {
+      if ($(this).scrollTop() > 300) {
+        $('#back-to-top').removeClass('d-none').addClass('d-block');
+      } else {
+        $('#back-to-top').removeClass('d-block').addClass('d-none');
+      }
+    });
+    
+    $('#back-to-top a').click(function(e) {
+      e.preventDefault();
+      $('html, body').animate({scrollTop: 0}, 300);
+      return false;
+    });
+  </script>
+</body>
+</html> 

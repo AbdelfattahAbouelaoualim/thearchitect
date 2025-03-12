@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Navigating GCP Network: A Closer Look at Key Features | The Architect</title>
+  <meta name="description" content="Modern cloud, data, and AI architecture">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="/css/styles.css">
+  
+  <!-- Prism CSS for code syntax highlighting -->
+  <link rel="stylesheet" href="/css/prism.css">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+</head>
+<body>
+  
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+    <div class="container">
+      <a class="navbar-brand" href="/">The Architect</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item ">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+          <li class="nav-item ">
+            <a class="nav-link" href="/about/">About</a>
+          </li>
+          <li class="nav-item ">
+            <a class="nav-link" href="/author/">Author</a>
+          </li>
+          <li class="nav-item ">
+            <a class="nav-link" href="/contact/">Contact</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main>
+    
+<div class="container">
+  <div class="row">
+    <div class="col-lg-8">
+      <article class="post">
+        <header class="article-header">
+          <h1 class="article-title">Navigating GCP Network: A Closer Look at Key Features</h1>
+          <div class="article-meta">
+            <span><i class="far fa-calendar-alt mr-1"></i> 03 Nov 2022</span>
+            
+            <span class="ml-3">
+              <i class="far fa-folder-open mr-1"></i><a href="/categories/#computer-science">Computer Science</a>, <a href="/categories/#data-engineering">Data Engineering</a>, <a href="/categories/#cloud-computing">Cloud Computing</a></span>
+            
+          </div>
+        </header>
+
+        
+        <div class="article-image mb-4">
+          <img src="/img/gcp-network.webp" alt="Navigating GCP Network: A Closer Look at Key Features" class="img-fluid w-100">
+        </div>
+        
+
+        <div class="article-content">
+          <style>
+  @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap');
+  
+  body {
+      font-family: 'Open Sans', sans-serif;
+  }
+
+  h1 {
+    font-family: 'Roboto', sans-serif;
+    color: #007bff;
+    margin-top: 30px;
+  }
+
+  h3 {
+    font-family: 'Roboto', sans-serif;
+    color: #007bff;
+    margin-top: 30px;
+  }
+
+  h4 {
+    font-family: 'Roboto', sans-serif;
+    color: #EA950B;
+    margin-top: 30px;
+  }
+
+  pre {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+  }
+</style>
+<h3 id="introduction" tabindex="-1">Introduction <a class="direct-link" href="#introduction" aria-hidden="true"></a></h3>
+<p>Networking in Google Cloud Platform (GCP) is designed to be robust and scalable to cater to the diverse needs of modern applications. This article delves into various GCP networking components and services that are crucial for securely managing and optimizing network traffic.</p>
+<h3 id="vpc-and-firewall-rules" tabindex="-1">VPC and Firewall Rules <a class="direct-link" href="#vpc-and-firewall-rules" aria-hidden="true"></a></h3>
+<h4 id="virtual-private-cloud-vpc" tabindex="-1">Virtual Private Cloud (VPC) <a class="direct-link" href="#virtual-private-cloud-vpc" aria-hidden="true"></a></h4>
+<p>VPC in GCP provides a private network space where resources like VM instances can be deployed. It facilitates control over networking topology, IP address range, and routing rules.</p>
+<h4 id="vpc-firewall-rules" tabindex="-1">VPC Firewall Rules <a class="direct-link" href="#vpc-firewall-rules" aria-hidden="true"></a></h4>
+<p>GCP’s firewall rules enable you to control inbound and outbound traffic within your VPC, ensuring only authorized access to and from your resources.</p>
+<pre class="code-block language-hcl"><code class=" language-hcl">resource "google_compute_firewall" "default" {
+  name    = "default-firewall"
+  network = "default"
+
+  allow {
+    protocol = "icmp"
+  }
+  allow {
+    protocol = "tcp"
+    ports    = ["80", "443"]
+  }
+}
+</code></pre><h3 id="cloud-firewall" tabindex="-1">Cloud Firewall <a class="direct-link" href="#cloud-firewall" aria-hidden="true"></a></h3>
+<p>Cloud Firewall allows for the management of firewall rules across multiple projects and networks, streamlining the enforcement of security policies.</p>
+<h3 id="google-cloud-nat" tabindex="-1">Google Cloud NAT <a class="direct-link" href="#google-cloud-nat" aria-hidden="true"></a></h3>
+<p>Google Cloud NAT (Network Address Translation) enables private instances within a VPC to access the internet securely.</p>
+<pre class="code-block language-hcl"><code class=" language-hcl">resource "google_compute_router_nat" "default" {
+  name   = "cloud-nat"
+  router = google_compute_router.default.name
+
+  nat_ip_allocate_option             = "AUTO_ONLY"
+  source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
+}
+</code></pre><h3 id="load-balancing-google-lb7-and-lb4" tabindex="-1">Load Balancing: Google LB7 and LB4 <a class="direct-link" href="#load-balancing-google-lb7-and-lb4" aria-hidden="true"></a></h3>
+<h4 id="google-lb7" tabindex="-1">Google LB7 <a class="direct-link" href="#google-lb7" aria-hidden="true"></a></h4>
+<p>Google LB7 (HTTP(S) Load Balancing) operates at the application layer (Layer 7) and distributes HTTP(S) traffic across multiple servers to ensure no single server becomes overwhelmed with too much traffic.</p>
+<h4 id="google-lb4" tabindex="-1">Google LB4 <a class="direct-link" href="#google-lb4" aria-hidden="true"></a></h4>
+<p>Google LB4 (TCP/UDP Load Balancing) operates at the transport layer (Layer 4), distributing traffic based on IP protocol data.</p>
+<h3 id="cloud-armor" tabindex="-1">Cloud Armor <a class="direct-link" href="#cloud-armor" aria-hidden="true"></a></h3>
+<p>Cloud Armor works alongside the HTTP(S) Load Balancing, providing defense against DDoS attacks, and enabling application-aware HTTP(S) firewall capabilities.</p>
+<h3 id="cloud-router" tabindex="-1">Cloud Router <a class="direct-link" href="#cloud-router" aria-hidden="true"></a></h3>
+<p>Cloud Router enables dynamic route updates between a VPC and on-premises network using BGP (Border Gateway Protocol).</p>
+<pre class="code-block language-hcl"><code class=" language-hcl">resource "google_compute_router" "default" {
+  name    = "cloud-router"
+  network = "default"
+
+  bgp {
+    asn = 64514
+  }
+}
+</code></pre><h3 id="vpc-connector-and-private-service-connect" tabindex="-1">VPC Connector and Private Service Connect <a class="direct-link" href="#vpc-connector-and-private-service-connect" aria-hidden="true"></a></h3>
+<h4 id="vpc-connector" tabindex="-1">VPC Connector <a class="direct-link" href="#vpc-connector" aria-hidden="true"></a></h4>
+<p>VPC Connector facilitates the connection between serverless GCP services and a VPC network, enabling access to resources within the VPC.</p>
+<h4 id="private-service-connect" tabindex="-1">Private Service Connect <a class="direct-link" href="#private-service-connect" aria-hidden="true"></a></h4>
+<p>Private Service Connect allows for secure and private connections to Google Cloud services, third-party services, or your own services.</p>
+<pre class="code-block language-hcl"><code class=" language-hcl">resource "google_service_networking_connection" "private_vpc_connection" {
+  network                 = "default"
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = ["reserved-range"]
+}
+</code></pre><h3 id="conclusion" tabindex="-1">Conclusion <a class="direct-link" href="#conclusion" aria-hidden="true"></a></h3>
+<p>The array of networking services provided by GCP furnishes developers and data engineers with robust tools to architect, secure, and optimize their network infrastructure. Each service is tailored to address specific networking requirements, thereby enabling fine-grained control over network traffic and security policies. Through a thorough understanding and apt utilization of these services, one can significantly enhance the efficiency and security of applications hosted on GCP.</p>
+
+        </div>
+
+        
+
+        <nav class="article-navigation">
+          
+            
+            
+
+            <div class="article-navigation-prev">
+              
+                <span class="article-navigation-label">Previous Article</span>
+                <a href="/_posts/2022-12-03-dbt/">Empowering Data Workflows with dbt: A SQL Lover&#39;s Delight</a>
+              
+            </div>
+
+            <div class="article-navigation-next text-right">
+              
+                <span class="article-navigation-label">Next Article</span>
+                <a href="/_posts/2022-10-18-terraform-gcp/">Harnessing Terraform for GCP: A Data Engineer&#39;s Toolkit</a>
+              
+            </div>
+          
+        </nav>
+      </article>
+    </div>
+
+    <div class="col-lg-4">
+      <aside class="sidebar">
+        <div class="sidebar-sticky">
+          <div class="sidebar-box">
+            <h3 class="sidebar-title">About</h3>
+            <p>Modern cloud, data, and AI architecture</p>
+            <a href="/about/" class="btn btn-outline-primary btn-sm">Learn more</a>
+          </div>
+          
+          <div class="sidebar-box">
+            <h3 class="sidebar-title">Stay Connected</h3>
+            <div class="social-media">
+              <a href="https://github.com/AbdelfattahAbouelaoualim" target="_blank" title="GitHub">
+                <i class="fab fa-github"></i>
+              </a>
+              <a href="https://www.linkedin.com/in/ia-ds-bg/" target="_blank" title="LinkedIn">
+                <i class="fab fa-linkedin-in"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div> 
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-4 mb-4">
+          <h5>About</h5>
+          <p>Modern cloud, data, and AI architecture</p>
+          <div class="social-media mt-3">
+            <a href="https://github.com/AbdelfattahAbouelaoualim" target="_blank" title="GitHub">
+              <i class="fab fa-github"></i>
+            </a>
+            <a href="https://www.linkedin.com/in/ia-ds-bg/" target="_blank" title="LinkedIn">
+              <i class="fab fa-linkedin-in"></i>
+            </a>
+          </div>
+        </div>
+        <div class="col-lg-4 mb-4">
+          <h5>Quick Links</h5>
+          <ul>
+            <li>
+              <a href="/">Home</a>
+            </li>
+            <li>
+              <a href="/about/">About</a>
+            </li>
+            <li>
+              <a href="/author/">Author</a>
+            </li>
+            <li>
+              <a href="/contact/">Contact</a>
+            </li>
+          </ul>
+        </div>
+        <div class="col-lg-4">
+          <h5>Categories</h5>
+          <ul>
+            
+            <li>
+              <a href="/categories/#computer-science">Computer Science</a>
+            </li>
+            
+            
+            <li>
+              <a href="/categories/#data-engineering">Data Engineering</a>
+            </li>
+            
+            
+            <li>
+              <a href="/categories/#mathematics">Mathematics</a>
+            </li>
+            
+            
+            <li>
+              <a href="/categories/#graph-theory">Graph Theory</a>
+            </li>
+            
+            
+            <li>
+              <a href="/categories/#machine-learning">Machine Learning</a>
+            </li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 The Architect | Made with <i class="fas fa-heart text-danger"></i></p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Back to Top Button -->
+  <div id="back-to-top" class="d-none">
+    <a href="#" class="btn btn-primary btn-sm rounded-circle">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Back to top button
+    $(window).scroll(function() {
+      if ($(this).scrollTop() > 300) {
+        $('#back-to-top').removeClass('d-none').addClass('d-block');
+      } else {
+        $('#back-to-top').removeClass('d-block').addClass('d-none');
+      }
+    });
+    
+    $('#back-to-top a').click(function(e) {
+      e.preventDefault();
+      $('html, body').animate({scrollTop: 0}, 300);
+      return false;
+    });
+  </script>
+</body>
+</html> 

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Navigating Continuous Data Pipelines: An Extensive Look into CI/CD with Azure DevOps, dbt, Airflow, GCS, and BigQuery | The Architect</title>
+  <meta name="description" content="Modern cloud, data, and AI architecture">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="/css/styles.css">
+  
+  <!-- Prism CSS for code syntax highlighting -->
+  <link rel="stylesheet" href="/css/prism.css">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+</head>
+<body>
+  
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+    <div class="container">
+      <a class="navbar-brand" href="/">The Architect</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item ">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+          <li class="nav-item ">
+            <a class="nav-link" href="/about/">About</a>
+          </li>
+          <li class="nav-item ">
+            <a class="nav-link" href="/author/">Author</a>
+          </li>
+          <li class="nav-item ">
+            <a class="nav-link" href="/contact/">Contact</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main>
+    
+<div class="container">
+  <div class="row">
+    <div class="col-lg-8">
+      <article class="post">
+        <header class="article-header">
+          <h1 class="article-title">Navigating Continuous Data Pipelines: An Extensive Look into CI/CD with Azure DevOps, dbt, Airflow, GCS, and BigQuery</h1>
+          <div class="article-meta">
+            <span><i class="far fa-calendar-alt mr-1"></i> 27 Oct 2023</span>
+            
+            <span class="ml-3">
+              <i class="far fa-folder-open mr-1"></i><a href="/categories/#devops">DevOps</a>, <a href="/categories/#data-engineering">Data Engineering</a>, <a href="/categories/#cloud-computing">Cloud Computing</a></span>
+            
+          </div>
+        </header>
+
+        
+        <div class="article-image mb-4">
+          <img src="/img/azuredevops.png" alt="Navigating Continuous Data Pipelines: An Extensive Look into CI/CD with Azure DevOps, dbt, Airflow, GCS, and BigQuery" class="img-fluid w-100">
+        </div>
+        
+
+        <div class="article-content">
+          <style>
+  @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap');
+  
+  body {
+      font-family: 'Open Sans', sans-serif;
+  }
+
+  h1 {
+    font-family: 'Roboto', sans-serif;
+    color: #007bff;
+    margin-top: 30px;
+  }
+
+  h3 {
+    font-family: 'Roboto', sans-serif;
+    color: #007bff;
+    margin-top: 30px;
+  }
+
+  h4 {
+    font-family: 'Roboto', sans-serif;
+    color: #EA950B;
+    margin-top: 30px;
+  }
+
+  pre {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+  }
+</style>
+<h3 id="introduction" tabindex="-1">Introduction <a class="direct-link" href="#introduction" aria-hidden="true"></a></h3>
+<p>Continuous Integration and Continuous Deployment (CI/CD) serve as the backbone of modern data engineering, enabling seamless and reliable data pipelines. This article embarks on an extensive exploration of CI/CD implementation, employing Azure DevOps, dbt, Airflow (via Cloud Composer), Google Cloud Storage (GCS), and BigQuery. We will walk through each tool, its role in the pipeline, and how they interconnect to form a cohesive data engineering workflow.</p>
+<h3 id="azure-devops-the-cornerstone-of-ci-cd" tabindex="-1">Azure DevOps: The Cornerstone of CI/CD <a class="direct-link" href="#azure-devops-the-cornerstone-of-ci-cd" aria-hidden="true"></a></h3>
+<p>Azure DevOps is a comprehensive suite of development tools facilitating CI/CD practices. It provides version control, automated builds, and deployment configurations.</p>
+<h4 id="establishing-a-ci-cd-pipeline" tabindex="-1">Establishing a CI/CD Pipeline <a class="direct-link" href="#establishing-a-ci-cd-pipeline" aria-hidden="true"></a></h4>
+<p>Setting up a CI/CD pipeline begins with defining the workflow in a YAML file. This file outlines the build and deployment process.</p>
+<pre class="code-block language-yaml"><code class=" language-yaml">trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- script: echo Building the project...
+  displayName: 'Build step'
+  
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    artifactName: 'my_artifact'
+    publishLocation: 'Container'
+</code></pre><p>In this YAML file, we define a simple pipeline triggered on changes to the main branch, utilizing an Ubuntu VM, and comprising two steps: a build step and a publish artifacts step.</p>
+<h3 id="dbt-data-build-tool-for-transformations" tabindex="-1">dbt: Data Build Tool for Transformations <a class="direct-link" href="#dbt-data-build-tool-for-transformations" aria-hidden="true"></a></h3>
+<p>dbt is instrumental for defining, documenting, and executing data transformations in BigQuery.</p>
+<h4 id="crafting-a-dbt-model" tabindex="-1">Crafting a dbt Model <a class="direct-link" href="#crafting-a-dbt-model" aria-hidden="true"></a></h4>
+<pre class="code-block language-yaml"><code class=" language-yaml">models:
+  my_project:
+    example:
+      materialized: table
+      post-hook:
+        - "GRANT SELECT ON  TO GROUP analytics"
+</code></pre><p>Here, we define a dbt model to materialize a table and set permissions using a post-hook.</p>
+<h3 id="cloud-composer-and-airflow-orchestrating-data-workflows" tabindex="-1">Cloud Composer and Airflow: Orchestrating Data Workflows <a class="direct-link" href="#cloud-composer-and-airflow-orchestrating-data-workflows" aria-hidden="true"></a></h3>
+<p>Cloud Composer, leveraging Apache Airflow, orchestrates complex data workflows, scheduling, monitoring, and managing workflows in a cloud environment.</p>
+<h4 id="sculpting-an-airflow-dag" tabindex="-1">Sculpting an Airflow DAG <a class="direct-link" href="#sculpting-an-airflow-dag" aria-hidden="true"></a></h4>
+<pre class="code-block language-python"><code class=" language-python">from airflow import DAG
+from airflow.operators.dummy_operator import DummyOperator
+from datetime import datetime
+
+default_args = {
+    'owner': 'airflow',
+    'depends_on_past': False,
+    'start_date': datetime(2022, 1, 1),
+}
+
+dag = DAG(
+    'example_dag',
+    default_args=default_args,
+    description='An example DAG',
+    schedule_interval='@daily',
+)
+
+start = DummyOperator(
+    task_id='start',
+    dag=dag,
+)
+</code></pre><p>Here, an example Airflow Directed Acyclic Graph (DAG) is created, defining the order of task execution and their dependencies.</p>
+<h3 id="google-cloud-storage-and-bigquery-storing-and-analyzing-data" tabindex="-1">Google Cloud Storage and BigQuery: Storing and Analyzing Data <a class="direct-link" href="#google-cloud-storage-and-bigquery-storing-and-analyzing-data" aria-hidden="true"></a></h3>
+<p>GCS and BigQuery form a potent duo for data storage and analysis.</p>
+<h4 id="uploading-and-querying-data" tabindex="-1">Uploading and Querying Data <a class="direct-link" href="#uploading-and-querying-data" aria-hidden="true"></a></h4>
+<pre class="code-block language-bash"><code class=" language-bash"># Uploading data to GCS
+gsutil cp data.csv gs://my_bucket/data.csv
+
+# Loading data into BigQuery
+bq load --autodetect --source_format=CSV my_dataset.my_table gs://my_bucket/data.csv
+</code></pre><pre class="code-block language-sql"><code class=" language-sql">-- Querying data in BigQuery
+SELECT * FROM `my_project.my_dataset.my_table`
+</code></pre><h3 id="conclusion" tabindex="-1">Conclusion <a class="direct-link" href="#conclusion" aria-hidden="true"></a></h3>
+<p>The amalgamation of Azure DevOps, dbt, Cloud Composer, GCS, and BigQuery under the umbrella of CI/CD fosters a streamlined, reliable, and robust data engineering infrastructure. This detailed walkthrough delineates how these tools can be orchestrated to accelerate the development cycle, fortify data pipelines, and propel organizations towards a data-driven epoch with assurance.</p>
+
+        </div>
+
+        
+
+        <nav class="article-navigation">
+          
+            
+            
+
+            <div class="article-navigation-prev">
+              
+                <span class="article-navigation-label">Previous Article</span>
+                <a href="/_posts/2020-03-14-DS/">Navigating the Data Revolution: The Pinnacle of Data Science in 2023</a>
+              
+            </div>
+
+            <div class="article-navigation-next text-right">
+              
+                <span class="article-navigation-label">Next Article</span>
+                <a href="/_posts/2023-10-25-terraform-docker/">Sailing the Clouds: Docker, GKE, and Terraform</a>
+              
+            </div>
+          
+        </nav>
+      </article>
+    </div>
+
+    <div class="col-lg-4">
+      <aside class="sidebar">
+        <div class="sidebar-sticky">
+          <div class="sidebar-box">
+            <h3 class="sidebar-title">About</h3>
+            <p>Modern cloud, data, and AI architecture</p>
+            <a href="/about/" class="btn btn-outline-primary btn-sm">Learn more</a>
+          </div>
+          
+          <div class="sidebar-box">
+            <h3 class="sidebar-title">Stay Connected</h3>
+            <div class="social-media">
+              <a href="https://github.com/AbdelfattahAbouelaoualim" target="_blank" title="GitHub">
+                <i class="fab fa-github"></i>
+              </a>
+              <a href="https://www.linkedin.com/in/ia-ds-bg/" target="_blank" title="LinkedIn">
+                <i class="fab fa-linkedin-in"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div> 
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-4 mb-4">
+          <h5>About</h5>
+          <p>Modern cloud, data, and AI architecture</p>
+          <div class="social-media mt-3">
+            <a href="https://github.com/AbdelfattahAbouelaoualim" target="_blank" title="GitHub">
+              <i class="fab fa-github"></i>
+            </a>
+            <a href="https://www.linkedin.com/in/ia-ds-bg/" target="_blank" title="LinkedIn">
+              <i class="fab fa-linkedin-in"></i>
+            </a>
+          </div>
+        </div>
+        <div class="col-lg-4 mb-4">
+          <h5>Quick Links</h5>
+          <ul>
+            <li>
+              <a href="/">Home</a>
+            </li>
+            <li>
+              <a href="/about/">About</a>
+            </li>
+            <li>
+              <a href="/author/">Author</a>
+            </li>
+            <li>
+              <a href="/contact/">Contact</a>
+            </li>
+          </ul>
+        </div>
+        <div class="col-lg-4">
+          <h5>Categories</h5>
+          <ul>
+            
+            <li>
+              <a href="/categories/#computer-science">Computer Science</a>
+            </li>
+            
+            
+            <li>
+              <a href="/categories/#data-engineering">Data Engineering</a>
+            </li>
+            
+            
+            <li>
+              <a href="/categories/#mathematics">Mathematics</a>
+            </li>
+            
+            
+            <li>
+              <a href="/categories/#graph-theory">Graph Theory</a>
+            </li>
+            
+            
+            <li>
+              <a href="/categories/#machine-learning">Machine Learning</a>
+            </li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 The Architect | Made with <i class="fas fa-heart text-danger"></i></p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Back to Top Button -->
+  <div id="back-to-top" class="d-none">
+    <a href="#" class="btn btn-primary btn-sm rounded-circle">
+      <i class="fas fa-arrow-up"></i>
+    </a>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Back to top button
+    $(window).scroll(function() {
+      if ($(this).scrollTop() > 300) {
+        $('#back-to-top').removeClass('d-none').addClass('d-block');
+      } else {
+        $('#back-to-top').removeClass('d-block').addClass('d-none');
+      }
+    });
+    
+    $('#back-to-top a').click(function(e) {
+      e.preventDefault();
+      $('html, body').animate({scrollTop: 0}, 300);
+      return false;
+    });
+  </script>
+</body>
+</html> 
