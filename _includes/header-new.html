@@ -1,0 +1,143 @@
+<!-- Navigation -->
+
+<nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="{{"/" | relative_url }}">
+      <div class="logo-container">
+        <!-- Création d'un logo texte comme alternative fiable -->
+        <div class="text-logo">A</div>
+        <span class="logo-text">The<strong>Architect</strong></span>
+      </div>
+    </a>
+    <button class="navbar-toggler navbar-dark" type="button" data-toggle="collapse" data-target="#navbarResponsive">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ml-auto">
+        {% for item in site.main_toc %}
+        <li class="nav-item {% if page.url == item.url %}active{% endif %}">
+          <a class="nav-link" href="{{ item.url | relative_url }}">
+            {{ item.title }}
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<style>
+.navbar {
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  padding: 10px 0;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.text-logo {
+  width: 45px;
+  height: 45px;
+  background-color: #EA950B;
+  color: white;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+  margin-right: 12px;
+  box-shadow: 0 0 10px rgba(234, 149, 11, 0.5);
+  transition: all 0.3s ease;
+}
+
+.logo-text {
+  color: #fff;
+  font-size: 1.4rem;
+  font-weight: 300;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+}
+
+.logo-text strong {
+  font-weight: 600;
+  color: #EA950B;
+}
+
+.nav-link {
+  color: #fff !important;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  position: relative;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: 0;
+  left: 50%;
+  background: #EA950B;
+  transition: all 0.3s ease;
+}
+
+.nav-link:hover::after {
+  width: 100%;
+  left: 0;
+}
+
+@media (max-width: 991px) {
+  .navbar-collapse {
+    background: rgba(0,0,0,0.9);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-top: 0.5rem;
+  }
+  
+  .logo-text {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .text-logo {
+    width: 35px;
+    height: 35px;
+    font-size: 18px;
+  }
+  
+  .logo-text {
+    font-size: 1rem;
+  }
+  
+  .navbar {
+    padding: 8px 0;
+  }
+}
+
+/* Animation subtile pour le logo */
+.navbar-brand:hover .text-logo {
+  transform: rotate(5deg);
+  background-color: #FFFFFF;
+  color: #EA950B;
+}
+
+.navbar-brand:hover .logo-text {
+  color: #EA950B;
+}
+
+.navbar-brand:hover .logo-text strong {
+  color: #fff;
+}
+</style> 

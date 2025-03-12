@@ -3,7 +3,10 @@
 <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
   <div class="container-fluid">
     <a class="navbar-brand" href="{{"/" | relative_url }}">
-      <img class="logo" src="/img/logo.png" alt="" />
+      <div class="logo-container">
+        <img class="logo" src="{{ '/img/logo.svg' | relative_url }}" alt="The Architect Logo" onerror="this.src='{{ '/img/logo.png' | relative_url }}'; this.onerror=null;" />
+        <span class="logo-text">The<strong>Architect</strong></span>
+      </div>
     </a>
     <button class="navbar-toggler navbar-dark" type="button" data-toggle="collapse" data-target="#navbarResponsive">
       <span class="navbar-toggler-icon"></span>
@@ -27,12 +30,57 @@
   background: rgba(0,0,0,0.8);
   backdrop-filter: blur(10px);
   transition: all 0.3s ease;
+  padding: 10px 0;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.logo-container::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  right: -5px;
+  bottom: -5px;
+  border-radius: 50%;
+  background: transparent;
+  z-index: 1;
 }
 
 .navbar-brand img.logo {
-  width: 150px;
-  height: auto;
+  width: 45px;
+  height: 45px;
   transition: all 0.3s ease;
+  margin-right: 12px;
+  filter: drop-shadow(0 0 4px rgba(234, 149, 11, 0.6));
+  background-color: transparent;
+  object-fit: contain;
+  display: inline-block;
+  vertical-align: middle;
+  z-index: 10;
+  position: relative;
+}
+
+.logo-text {
+  color: #fff;
+  font-size: 1.4rem;
+  font-weight: 300;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+}
+
+.logo-text strong {
+  font-weight: 600;
+  color: #EA950B;
 }
 
 .nav-link {
@@ -60,9 +108,93 @@
 
 @media (max-width: 991px) {
   .navbar-collapse {
-    background: rgba(0,0,0,0);
+    background: rgba(0,0,0,0.9);
     padding: 1rem;
     border-radius: 0.5rem;
+    margin-top: 0.5rem;
+  }
+  
+  .logo-text {
+    font-size: 1.2rem;
   }
 }
+
+@media (max-width: 576px) {
+  .navbar-brand img.logo {
+    width: 35px;
+    height: 35px;
+  }
+  
+  .logo-text {
+    font-size: 1rem;
+  }
+  
+  .navbar {
+    padding: 8px 0;
+  }
+}
+
+/* Animation subtile pour le logo */
+.navbar-brand:hover img.logo {
+  transform: rotate(5deg);
+}
+
+.navbar-brand:hover .logo-text {
+  color: #EA950B;
+}
+
+.navbar-brand:hover .logo-text strong {
+  color: #fff;
+}
 </style>
+
+<!-- Script pour assurer que le logo s'affiche -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const logo = document.querySelector('.logo');
+  
+  if (logo) {
+    // Vérifie si le logo est chargé correctement
+    if (logo.complete) {
+      checkLogoVisibility();
+    } else {
+      logo.addEventListener('load', checkLogoVisibility);
+      logo.addEventListener('error', fixLogoError);
+    }
+  }
+  
+  function checkLogoVisibility() {
+    if (logo.naturalWidth === 0 || logo.naturalHeight === 0) {
+      fixLogoError();
+    }
+  }
+  
+  function fixLogoError() {
+    // Fallback vers le logo PNG si le SVG échoue
+    logo.src = '{{ "/img/logo.png" | relative_url }}';
+    
+    // Si ça échoue toujours, créer un logo textuel
+    logo.addEventListener('error', function() {
+      const logoContainer = document.querySelector('.logo-container');
+      if (logoContainer) {
+        logo.style.display = 'none';
+        const textLogo = document.createElement('div');
+        textLogo.className = 'text-logo';
+        textLogo.innerHTML = 'A';
+        textLogo.style.width = '45px';
+        textLogo.style.height = '45px';
+        textLogo.style.backgroundColor = '#EA950B';
+        textLogo.style.color = 'white';
+        textLogo.style.borderRadius = '10px';
+        textLogo.style.display = 'flex';
+        textLogo.style.alignItems = 'center';
+        textLogo.style.justifyContent = 'center';
+        textLogo.style.fontSize = '24px';
+        textLogo.style.fontWeight = 'bold';
+        textLogo.style.margin = '0 12px 0 0';
+        logoContainer.insertBefore(textLogo, logoContainer.firstChild);
+      }
+    });
+  }
+});
+</script> 

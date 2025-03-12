@@ -1,0 +1,126 @@
+---
+layout: base.njk
+title: Articles - The Architect
+description: All blog articles
+permalink: "/blog/{% if pagination.pageNumber > 0 %}{{ pagination.pageNumber + 1 }}/{% endif %}"
+pagination:
+  data: collections.posts
+  size: 4
+  reverse: false
+---
+
+<!-- Page Title -->
+<div class="container mt-5 mb-5">
+  <h1 class="page-title">Blog Articles</h1>
+  <p class="lead">Discover our articles on modern architecture (Page {{ pagination.pageNumber + 1 }} of {{ pagination.pages.length }})</p>
+</div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-lg-8">
+      {# Affichage des articles avec une boucle explicite #}
+      {% for post in pagination.items %}
+        <article class="post-preview mb-5">
+          {% if post.data.image %}
+          <div class="post-preview-image mb-3">
+            <a href="{{ post.url | url }}">
+              <img 
+                src="{{ '/img/' + post.data.image | url }}" 
+                alt="{{ post.data.title }}"
+                loading="lazy"
+                class="img-fluid w-100">
+            </a>
+          </div>
+          {% endif %}
+          
+          <h2 class="post-preview-title">
+            <a href="{{ post.url | url }}">{{ post.data.title }}</a>
+          </h2>
+          
+          <div class="post-preview-meta mb-3">
+            <span><i class="far fa-calendar-alt mr-1"></i> {{ post.date | readableDate }}</span>
+            {% if post.data.categories %}
+            <span class="ml-3">
+              <i class="far fa-folder-open mr-1"></i>
+              {%- for cat in post.data.categories -%}
+                <a href="{{ '/categories/' | url }}#{{ cat | slug }}">{{ cat }}</a>
+                {%- if not loop.last %}, {% endif -%}
+              {%- endfor -%}
+            </span>
+            {% endif %}
+          </div>
+          
+          <div class="post-preview-excerpt mb-3">
+            <p>{{ post.templateContent | cleanExcerpt | truncate(200) }}</p>
+          </div>
+          
+          <a href="{{ post.url | url }}" class="btn btn-primary">Read More →</a>
+        </article>
+        
+        {% if not loop.last %}<hr class="mb-4">{% endif %}
+      {% endfor %}
+
+      {# Débogage de pagination #}
+      <div class="alert alert-info d-none">
+        <p>Total number of articles: {{ collections.posts.length }}</p>
+        <p>Articles per page: 4</p>
+        <p>Current page: {{ pagination.pageNumber + 1 }}</p>
+        <p>Total number of pages: {{ pagination.pages.length }}</p>
+      </div>
+      
+      <!-- Pagination -->
+      {% if pagination.pages.length > 1 %}
+      <nav aria-label="Page navigation" class="mt-5">
+        <ul class="pagination justify-content-center">
+          {% if pagination.href.previous %}
+          <li class="page-item">
+            <a class="page-link" href="{{ pagination.href.previous | url }}" aria-label="Previous">
+              <span aria-hidden="true">&laquo;</span> Previous
+            </a>
+          </li>
+          {% else %}
+          <li class="page-item disabled">
+            <span class="page-link"><span aria-hidden="true">&laquo;</span> Previous</span>
+          </li>
+          {% endif %}
+          
+          {% for pageNumber in pagination.pages %}
+          <li class="page-item {% if pagination.pageNumber == loop.index0 %}active{% endif %}">
+            <a class="page-link" href="{{ pagination.hrefs[loop.index0] | url }}">{{ loop.index }}</a>
+          </li>
+          {% endfor %}
+          
+          {% if pagination.href.next %}
+          <li class="page-item">
+            <a class="page-link" href="{{ pagination.href.next | url }}" aria-label="Next">
+              Next <span aria-hidden="true">&raquo;</span>
+            </a>
+          </li>
+          {% else %}
+          <li class="page-item disabled">
+            <span class="page-link">Next <span aria-hidden="true">&raquo;</span></span>
+          </li>
+          {% endif %}
+        </ul>
+      </nav>
+      {% endif %}
+    </div>
+    
+    <div class="col-lg-4">
+      <aside class="sidebar">
+        <div class="sidebar-sticky">
+          <div class="sidebar-box">
+            <h3 class="sidebar-title">About</h3>
+            <p>{{ metadata.description }}</p>
+            <a href="{{ '/about/' | url }}" class="btn btn-outline-primary btn-sm">Learn more</a>
+          </div>
+          
+          <div class="sidebar-box">
+            <h3 class="sidebar-title">Follow Me</h3>
+            <!-- ... existing code ... -->
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div> 

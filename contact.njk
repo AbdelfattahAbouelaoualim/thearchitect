@@ -1,0 +1,79 @@
+---
+layout: base.njk
+title: Contact
+description: Feel free to contact me for any questions or suggestions.
+permalink: /contact/
+---
+
+<!-- Hero Section -->
+<section class="hero hero-small bg-primary py-4 mb-5">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-8 mx-auto text-center text-white">
+        <h1 class="display-4 font-weight-bold mb-2">Contact</h1>
+        <p class="lead">Feel free to contact me for any questions or suggestions</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+  <div class="row">
+    <div class="col-lg-8">
+      <div class="contact-content bg-white p-4 p-md-5 rounded shadow-sm">
+        <div class="contact-intro mb-5 text-center">
+          <p class="lead">Do you have a question, suggestion, or want to collaborate? Fill out the form below and I'll get back to you as soon as possible.</p>
+        </div>
+        
+        <form class="contact-form" action="https://formspree.io/f/mnnjennz" method="POST">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" class="form-control" id="name" name="name" required>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="subject">Subject</label>
+            <input type="text" class="form-control" id="subject" name="subject" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="message">Message</label>
+            <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
+          </div>
+          
+          <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary px-5 py-2">Send</button>
+          </div>
+
+          <div class="privacy-notice mt-4 text-muted small">
+            <p>The information collected through this form is used solely to respond to your request. No data will be kept beyond the time necessary to process your message, nor shared with third parties. In accordance with personal data protection regulations, you have the right to access, rectify, and delete your data.</p>
+          </div>
+        </form>
+      </div>
+    </div>
+    
+    <div class="col-lg-4">
+      <aside class="sidebar">
+        <div class="sidebar-sticky">
+          <div class="sidebar-box">
+            <h3 class="sidebar-title">About</h3>
+            <p>{{ metadata.description }}</p>
+            <a href="{{ '/about/' | url }}" class="btn btn-outline-primary btn-sm">Learn more</a>
+          </div>
+          
+          <!-- La section Categories a été supprimée -->
+        </div>
+      </aside>
+    </div>
+  </div>
+</div> 

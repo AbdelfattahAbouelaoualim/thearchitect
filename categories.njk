@@ -1,0 +1,103 @@
+---
+layout: base.njk
+title: Categories
+permalink: /categories/
+---
+
+<!-- Hero Section -->
+<section class="hero hero-small bg-primary py-4 mb-5">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-8 mx-auto text-center text-white">
+        <h1 class="display-4 font-weight-bold mb-2">Categories</h1>
+        <p class="lead">Explore articles by category</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+  <div class="row">
+    <div class="col-lg-8">
+      {%- for cat, posts in collections.categories %}
+      <section id="{{ cat | slug }}" class="category-section mb-5">
+        <h2 class="section-title">{{ cat }}</h2>
+        
+        <div class="category-posts">
+          {%- for post in posts %}
+          <article class="post-preview post-preview-small">
+            {% if post.data.image %}
+            <div class="row">
+              <div class="col-md-4">
+                <div class="post-preview-image">
+                  <a href="{{ post.url | url }}">
+                    <img 
+                      src="{{ '/img/' + post.data.image | url }}" 
+                      alt="{{ post.data.title }}"
+                      loading="lazy"
+                      class="img-fluid rounded">
+                  </a>
+                </div>
+              </div>
+              <div class="col-md-8">
+                <h3 class="post-preview-title">
+                  <a href="{{ post.url | url }}">{{ post.data.title }}</a>
+                </h3>
+                <div class="post-preview-meta">
+                  <span><i class="far fa-calendar-alt mr-1"></i> {{ post.date | readableDate }}</span>
+                </div>
+                <div class="post-preview-excerpt">
+                  <p>{{ post.templateContent | cleanExcerpt | truncate(150) }}</p>
+                </div>
+              </div>
+            </div>
+            {% else %}
+            <h3 class="post-preview-title">
+              <a href="{{ post.url | url }}">{{ post.data.title }}</a>
+            </h3>
+            <div class="post-preview-meta">
+              <span><i class="far fa-calendar-alt mr-1"></i> {{ post.date | readableDate }}</span>
+            </div>
+            <div class="post-preview-excerpt">
+              <p>{{ post.templateContent | cleanExcerpt | truncate(150) }}</p>
+            </div>
+            {% endif %}
+          </article>
+          {%- endfor %}
+        </div>
+      </section>
+      {%- endfor %}
+    </div>
+    
+    <div class="col-lg-4">
+      <aside class="sidebar">
+        <div class="sidebar-sticky">
+          <div class="sidebar-box">
+            <h3 class="sidebar-title">All Categories</h3>
+            <ul class="categories-list">
+              {%- for cat, posts in collections.categories %}
+              <li>
+                <a href="#{{ cat | slug }}">
+                  {{ cat }}
+                  <span class="badge">{{ posts.length }}</span>
+                </a>
+              </li>
+              {%- endfor %}
+            </ul>
+          </div>
+          
+          <div class="sidebar-box">
+            <h3 class="sidebar-title">About</h3>
+            <p>{{ metadata.description }}</p>
+            <a href="{{ '/about/' | url }}" class="btn btn-outline-primary btn-sm">Learn more</a>
+          </div>
+          
+          <div class="sidebar-box">
+            <h3 class="sidebar-title">Follow Me</h3>
+            <!-- ... existing code ... -->
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div> 

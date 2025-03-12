@@ -1,0 +1,91 @@
+---
+layout: base.njk
+---
+
+<div class="container">
+  <div class="row">
+    <div class="col-lg-8">
+      <article class="post">
+        <header class="article-header">
+          <h1 class="article-title">{{ title }}</h1>
+          <div class="article-meta">
+            <span><i class="far fa-calendar-alt mr-1"></i> {{ date | readableDate }}</span>
+            {% if categories %}
+            <span class="ml-3">
+              <i class="far fa-folder-open mr-1"></i>
+              {%- for cat in categories -%}
+                <a href="{{ '/categories/' | url }}#{{ cat | slug }}">{{ cat }}</a>
+                {%- if not loop.last %}, {% endif -%}
+              {%- endfor -%}
+            </span>
+            {% endif %}
+          </div>
+        </header>
+
+        {% if image %}
+        <div class="article-image mb-4">
+          <img src="{{ '/img/' + image | url }}" alt="{{ title }}" class="img-fluid w-100">
+        </div>
+        {% endif %}
+
+        <div class="article-content">
+          {{ content | safe }}
+        </div>
+
+        {% if tags and tags.length > 0 %}
+        <div class="article-tags">
+          <h5><i class="fas fa-tags mr-2"></i>Tags:</h5>
+          {% for tag in tags %}
+          <a href="{{ '/tags/' | url }}#{{ tag | slug }}">{{ tag }}</a>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <nav class="article-navigation">
+          {% if collections.posts %}
+            {% set previousPost = collections.posts | getPreviousCollectionItem %}
+            {% set nextPost = collections.posts | getNextCollectionItem %}
+
+            <div class="article-navigation-prev">
+              {% if previousPost %}
+                <span class="article-navigation-label">Previous Article</span>
+                <a href="{{ previousPost.url | url }}">{{ previousPost.data.title }}</a>
+              {% endif %}
+            </div>
+
+            <div class="article-navigation-next text-right">
+              {% if nextPost %}
+                <span class="article-navigation-label">Next Article</span>
+                <a href="{{ nextPost.url | url }}">{{ nextPost.data.title }}</a>
+              {% endif %}
+            </div>
+          {% endif %}
+        </nav>
+      </article>
+    </div>
+
+    <div class="col-lg-4">
+      <aside class="sidebar">
+        <div class="sidebar-sticky">
+          <div class="sidebar-box">
+            <h3 class="sidebar-title">About</h3>
+            <p>{{ metadata.description }}</p>
+            <a href="{{ '/about/' | url }}" class="btn btn-outline-primary btn-sm">Learn more</a>
+          </div>
+          
+          <div class="sidebar-box">
+            <h3 class="sidebar-title">Stay Connected</h3>
+            <div class="social-media">
+              <a href="https://github.com/AbdelfattahAbouelaoualim" target="_blank" title="GitHub">
+                <i class="fab fa-github"></i>
+              </a>
+              <a href="https://www.linkedin.com/in/ia-ds-bg/" target="_blank" title="LinkedIn">
+                <i class="fab fa-linkedin-in"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div> 

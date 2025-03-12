@@ -48,7 +48,7 @@ Terraform, an open-source Infrastructure as Code (IaC) software by HashiCorp, em
 1. Install Terraform
 Download and install Terraform from the official website.
 
-```bat
+```bash
 $ wget https://releases.hashicorp.com/terraform/1.0.0/terraform_1.0.0_linux_amd64.zip
 $ unzip terraform_1.0.0_linux_amd64.zip
 $ sudo mv terraform /usr/local/bin/
@@ -57,7 +57,7 @@ $ sudo mv terraform /usr/local/bin/
 2. Authenticate GCP
 Authenticate to GCP using a service account key JSON file.
 
-```bat
+```bash
 $ gcloud auth application-default login
 ```
 
@@ -67,20 +67,22 @@ Create a file named main.tf with the following content to provision a GCP comput
 
 ```hcl
 provider "google" {
-  project = "your-gcp-project-id"
-  region  = "us-central1"
+  credentials = file("path/to/your/service-account-key.json")
+  project     = "your-gcp-project-id"
+  region      = "us-central1"
 }
 
 resource "google_compute_instance" "vm_instance" {
   name         = "terraform-instance"
   machine_type = "e2-medium"
-  
+  zone         = "us-central1-a"
+
   boot_disk {
     initialize_params {
-      image = "debian-cloud/debian-9"
+      image = "debian-cloud/debian-10"
     }
   }
-  
+
   network_interface {
     network = "default"
     access_config {
@@ -93,8 +95,9 @@ resource "google_compute_instance" "vm_instance" {
 2. Initialize and Apply Configuration
 Initialize Terraform and apply the configuration to provision the resources.
 
-```bat
+```bash
 $ terraform init
+$ terraform plan
 $ terraform apply
 ```
 

@@ -1,0 +1,32 @@
+{
+  "title": "The Architect",
+  "description": "Modern cloud, data, and AI architecture",
+  "url": "https://www.thearchitect.page/",
+  "language": "en-US",
+  "author": {
+    "name": "The Architect",
+    "email": "",
+    "url": "https://www.thearchitect.page/author/"
+  },
+  "feed": {
+    "path": "/feed.xml"
+  },
+  "navigation": [
+    {
+      "title": "Home",
+      "url": "/"
+    },
+    {
+      "title": "About",
+      "url": "/about/"
+    },
+    {
+      "title": "Author",
+      "url": "/author/"
+    },
+    {
+      "title": "Contact",
+      "url": "/contact/"
+    }
+  ]
+} 
