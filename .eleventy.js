@@ -31,6 +31,7 @@ module.exports = function(eleventyConfig) {
   eleventyConfig.addPassthroughCopy("fontawesome-free-5.12.1-web");
   eleventyConfig.addPassthroughCopy("favicon.ico");
   eleventyConfig.addPassthroughCopy("CNAME");
+  eleventyConfig.addPassthroughCopy("site.webmanifest");
 
   // Formats de date
   eleventyConfig.addFilter("readableDate", dateObj => {
